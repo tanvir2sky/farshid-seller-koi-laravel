@@ -6,6 +6,7 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Ecommerce\Facades\EcommerceHelper;
+use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Ecommerce\Services\Products\GetProductService;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Forms\ContactStoreForm;
@@ -196,6 +197,41 @@ class PublicStoreController extends BaseController
             ->add(__('Stores'), route('public.stores'))
             ->add($store->name, $store->url);
 
+        $storeProductCategories = ProductCategory::query()
+            ->wherePublished()
+            ->whereHas('products', function ($query) use ($store): void {
+                $query
+                    ->where('ec_products.store_id', $store->getKey())
+                    ->wherePublished();
+            })
+            ->with('slugable')
+            ->orderBy('name')
+            ->get();
+
+        $allowedCategoryIds = $storeProductCategories->pluck('id')->all();
+        $incomingCategories = array_values(array_unique(array_filter(array_map(
+            static fn ($id): int => (int) $id,
+            (array) $request->input('categories', [])
+        ))));
+        $request->merge([
+            'categories' => array_values(array_intersect($incomingCategories, $allowedCategoryIds)),
+        ]);
+
+        $filterCategoryIds = array_values(array_map(
+            static fn ($id): int => (int) $id,
+            (array) $request->input('categories', [])
+        ));
+        $storeProductFilterCategoryNames = $storeProductCategories
+            ->filter(fn (ProductCategory $category) => in_array((int) $category->getKey(), $filterCategoryIds, true))
+            ->sortBy(function (ProductCategory $category) use ($filterCategoryIds): int {
+                $position = array_search((int) $category->getKey(), $filterCategoryIds, true);
+
+                return $position === false ? PHP_INT_MAX : $position;
+            })
+            ->map(fn (ProductCategory $category) => (string) $category->name)
+            ->values()
+            ->all();
+
         $with = EcommerceHelper::withProductEagerLoadingRelations();
 
         $products = $productService->getProduct(
@@ -240,7 +276,7 @@ class PublicStoreController extends BaseController
 
         return Theme::scope(
             'marketplace.store',
-            compact('store', 'products', 'contactForm'),
+            compact('store', 'products', 'contactForm', 'storeProductCategories', 'storeProductFilterCategoryNames'),
             MarketplaceHelper::viewPath('store', false)
         )->render();
     }

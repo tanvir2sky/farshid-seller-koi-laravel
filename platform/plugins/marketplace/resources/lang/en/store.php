@@ -63,4 +63,6 @@ return [
     'vendor_name' => 'Name',
     'withdrawal_approval_notification' => 'This withdrawal request has been created by :vendor. Their current balance is :balance.',
     'edit_this_store' => 'Edit this store',
+    'product_found_in_category' => 'product found in :categories',
+    'products_found_in_category' => 'products found in :categories',
 ];

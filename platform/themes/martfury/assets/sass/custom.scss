@@ -2485,3 +2485,84 @@ ul.visual-swatch.color-swatch {
         }
     }
 }
+
+// Vendor store — product category filter (matches shop sidebar widgets)
+.store-product-categories {
+    &.widget_shop {
+        border-radius: 4px;
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+    }
+
+    .widget-title {
+        margin-bottom: 18px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #dedede;
+    }
+
+    .store-product-categories__list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        max-height: min(55vh, 420px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+
+        &::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: #c8c8c8;
+            border-radius: 3px;
+        }
+
+        li {
+            margin: 0;
+
+            + li {
+                border-top: 1px solid #e8e8e8;
+            }
+
+            a {
+                position: relative;
+                display: block;
+                padding: 11px 10px 11px 14px;
+                font-family: $font-1st;
+                font-size: 14px;
+                line-height: 1.45;
+                color: $color-text;
+                text-decoration: none;
+                border-left: 3px solid transparent;
+                transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+
+                &:hover {
+                    color: $color-heading;
+                    background-color: rgba(255, 255, 255, 0.92);
+                    border-left-color: $color-1st;
+                }
+            }
+
+            &.active a {
+                color: $color-heading;
+                font-weight: 600;
+                background-color: #fff;
+                border-left-color: $color-1st;
+            }
+        }
+    }
+}
+
+body[dir='rtl'] .store-product-categories .store-product-categories__list li {
+    a {
+        border-left: none;
+        border-right: 3px solid transparent;
+
+        &:hover {
+            border-right-color: $color-1st;
+        }
+    }
+
+    &.active a {
+        border-right-color: $color-1st;
+    }
+}
