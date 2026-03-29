@@ -1,0 +1,86 @@
+# -----------------------------------------------------------------------------
+# Laravel 11
+# -----------------------------------------------------------------------------
+/vendor
+.env
+.env.backup
+.env.production
+.env.testing
+.phpunit.result.cache
+.phpunit.cache
+/auth.json
+Homestead.json
+Homestead.yaml
+
+# Logs
+*.log
+npm-debug.log
+yarn-error.log
+
+# -----------------------------------------------------------------------------
+# Node (root + platform workspaces in package.json)
+# -----------------------------------------------------------------------------
+/node_modules
+
+# Laravel Mix (this project)
+/public/hot
+/public/mix-manifest.json
+
+# Vite output (Laravel default; safe if unused)
+/public/build
+
+# -----------------------------------------------------------------------------
+# Storage & runtime (beyond bootstrap/cache and storage/*/.gitignore)
+# -----------------------------------------------------------------------------
+/public/storage
+/storage/*.key
+/storage/pail
+/storage/.license
+/storage/fonts
+/storage/cache_keys.json
+/storage/app/backup
+/storage/installing
+/storage/installed
+/storage/framework/*.txt
+/storage/framework/laravel-excel/
+storage/framework/maintenance.php
+
+# -----------------------------------------------------------------------------
+# Botble CMS — published / generated assets
+# -----------------------------------------------------------------------------
+/public/vendor/core
+/public/themes
+/public/docs
+/resources/docs
+
+# Only track default English; other locales are generated/overrides
+/lang/*
+!/lang/en
+
+# -----------------------------------------------------------------------------
+# IDE, OS, tooling
+# -----------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+__MACOSX
+/.fleet
+/.idea
+/.nova
+/.phpintel
+/.vscode
+/.vagrant
+/.zed
+.phpactor.json
+.phpstorm.meta.php
+_ide_helper.php
+_ide_helper_models.php
+/.php_cs.cache
+/.sass-cache
+/.scribe
+
+# -----------------------------------------------------------------------------
+# Legacy / optional
+# -----------------------------------------------------------------------------
+/bower_components
+sftp-config.json
+/log
