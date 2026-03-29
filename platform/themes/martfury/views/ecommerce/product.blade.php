@@ -4,6 +4,7 @@
     Theme::set('bottomFooter', Theme::partial('footer-product-page', compact('product')));
     Theme::set('pageId', 'product-page');
     Theme::set('headerMobile', Theme::partial('header-mobile-product'));
+    $defaultProductTabIsVendor = is_plugin_active('marketplace') && $product->store_id;
 @endphp
 
 <div class="ps-page--product">
@@ -199,7 +200,7 @@
                                     <li><a href="#tab-reviews">{{ __('Reviews') }}&nbsp;({{ $product->reviews_count }})</a></li>
                                 @endif
                                 @if (is_plugin_active('marketplace') && $product->store_id)
-                                    <li><a href="#tab-vendor">{{ __('Vendor') }}</a></li>
+                                    <li @class(['active' => $defaultProductTabIsVendor])><a href="#tab-vendor">{{ __('Vendor') }}</a></li>
                                 @endif
                                 @if (is_plugin_active('faq'))
                                     @if (count($product->faq_items) > 0)
@@ -208,7 +209,7 @@
                                 @endif
                             </ul>
                             <div class="ps-tabs">
-                                <div class="ps-tab active" id="tab-description">
+                                <div @class(['ps-tab', 'active' => ! $defaultProductTabIsVendor]) id="tab-description">
                                     <div class="ps-document">
                                         <div class="ck-content">
                                             {!! BaseHelper::clean($product->content) !!}
@@ -233,7 +234,7 @@
                                 @endif
 
                                 @if (is_plugin_active('marketplace') && $product->store_id)
-                                    <div class="ps-tab" id="tab-vendor">
+                                    <div @class(['ps-tab', 'active' => $defaultProductTabIsVendor]) id="tab-vendor">
                                         <h4>{{ $product->store->name }}</h4>
                                         <div>
                                             {!! BaseHelper::clean($product->store->content) !!}
