@@ -10,10 +10,13 @@ use Botble\Base\Forms\FieldOptions\EmailFieldOption;
 use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
 use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
+use Botble\Base\Forms\FieldOptions\MultiChecklistFieldOption;
+use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\EditorField;
 use Botble\Base\Forms\Fields\EmailField;
 use Botble\Base\Forms\Fields\HtmlField;
+use Botble\Base\Forms\Fields\MultiCheckListField;
 use Botble\Base\Forms\Fields\MediaImageField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextareaField;
@@ -26,6 +29,7 @@ use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Forms\Concerns\HasSubmitButton;
 use Botble\Marketplace\Http\Requests\StoreRequest;
 use Botble\Marketplace\Models\Store;
+use Botble\Marketplace\Models\StoreCategory;
 
 class StoreForm extends FormAbstract
 {
@@ -123,6 +127,26 @@ class StoreForm extends FormAbstract
                     ->all(),
                 'colspan' => 3,
             ])
+            ->add(
+                'category_ids[]',
+                MultiCheckListField::class,
+                MultiChecklistFieldOption::make()
+                    ->label(trans('plugins/marketplace::store.forms.store_categories'))
+                    ->choices(
+                        StoreCategory::query()
+                            ->orderBy('order')
+                            ->orderBy('name')
+                            ->pluck('name', 'id')
+                            ->all()
+                    )
+                    ->selected(
+                        $this->getModel()->exists
+                            ? $this->getModel()->categories->pluck('id')->all()
+                            : []
+                    )
+                    ->helperText(trans('plugins/marketplace::store.forms.store_categories_helper'))
+                    ->colspan(6)
+            )
             ->when(! MarketplaceHelper::hideStoreSocialLinks(), function (): void {
                 $this
                     ->add('extended_info_content', HtmlField::class, [

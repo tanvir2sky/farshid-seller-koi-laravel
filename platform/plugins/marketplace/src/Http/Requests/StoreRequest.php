@@ -12,6 +12,30 @@ use Illuminate\Validation\Rule;
 
 class StoreRequest extends Request
 {
+    protected function prepareForValidation(): void
+    {
+        $ids = $this->input('category_ids');
+
+        if ($ids === null || $ids === '') {
+            $this->merge(['category_ids' => []]);
+
+            return;
+        }
+
+        if (! is_array($ids)) {
+            $this->merge(['category_ids' => array_values(array_filter([(int) $ids]))]);
+
+            return;
+        }
+
+        $this->merge([
+            'category_ids' => array_values(array_unique(array_filter(array_map(
+                static fn ($id) => (int) $id,
+                $ids
+            )))),
+        ]);
+    }
+
     public function rules(): array
     {
         return [
@@ -33,6 +57,8 @@ class StoreRequest extends Request
             'logo' => ['nullable', 'string', new MediaImageRule()],
             'logo_square' => ['nullable', 'string', new MediaImageRule()],
             'cover_image' => ['nullable', 'string', new MediaImageRule()],
+            'category_ids' => ['nullable', 'array'],
+            'category_ids.*' => ['integer', 'exists:mp_store_categories,id'],
         ];
     }
 }

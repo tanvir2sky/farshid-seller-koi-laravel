@@ -22,7 +22,14 @@ if (is_plugin_active('marketplace')) {
             return null;
         }
 
-        $with = ['slugable'];
+        $with = [
+            'slugable',
+            'categories' => function ($query): void {
+                $query
+                    ->where('mp_store_categories.status', BaseStatusEnum::PUBLISHED)
+                    ->with('slugable');
+            },
+        ];
         if (EcommerceHelper::isReviewEnabled()) {
             $with['reviews'] = function ($query): void {
                 $query->where([

@@ -54,6 +54,8 @@ class StoreController extends BaseController
 
         $store = $form->getModel();
 
+        $store->categories()->sync(array_filter($request->input('category_ids', [])));
+
         if ($request->has('social_links')) {
             if ($socialLinks = $request->input('social_links', [])) {
                 $socials = array_keys(MarketplaceHelper::getAllowedSocialLinks());
@@ -71,6 +73,8 @@ class StoreController extends BaseController
 
     public function edit(Store $store, Request $request)
     {
+        $store->load('categories');
+
         $form = StoreForm::createFromModel($store)
             ->setUrl(route('marketplace.store.edit.update', $store->getKey()))
             ->renderForm();
@@ -103,6 +107,8 @@ class StoreController extends BaseController
         StoreForm::createFromModel($store)
             ->setRequest($request)
             ->save();
+
+        $store->categories()->sync(array_filter($request->input('category_ids', [])));
 
         if ($request->has('social_links')) {
             if ($socialLinks = $request->input('social_links', [])) {

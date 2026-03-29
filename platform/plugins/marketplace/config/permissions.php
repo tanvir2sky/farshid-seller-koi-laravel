@@ -38,6 +38,27 @@ return [
     ],
 
     [
+        'name' => 'Store categories',
+        'flag' => 'marketplace.store-category.index',
+        'parent_flag' => 'marketplace.index',
+    ],
+    [
+        'name' => 'Create',
+        'flag' => 'marketplace.store-category.create',
+        'parent_flag' => 'marketplace.store-category.index',
+    ],
+    [
+        'name' => 'Edit',
+        'flag' => 'marketplace.store-category.edit',
+        'parent_flag' => 'marketplace.store-category.index',
+    ],
+    [
+        'name' => 'Delete',
+        'flag' => 'marketplace.store-category.destroy',
+        'parent_flag' => 'marketplace.store-category.index',
+    ],
+
+    [
         'name' => 'Withdrawals',
         'flag' => 'marketplace.withdrawal.index',
         'parent_flag' => 'marketplace.index',

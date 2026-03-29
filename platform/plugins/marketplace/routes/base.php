@@ -40,6 +40,17 @@ AdminHelper::registerRoutes(function (): void {
                 });
             });
 
+            Route::group(['prefix' => 'store-categories', 'as' => 'store-categories.'], function (): void {
+                Route::resource('', 'StoreCategoryController')
+                    ->parameters(['' => 'store_category']);
+
+                Route::get('get-list-store-categories-for-select', [
+                    'as' => 'get-list-store-categories-for-select',
+                    'uses' => 'StoreCategoryController@getListForSelect',
+                    'permission' => 'marketplace.store-category.index',
+                ]);
+            });
+
             Route::group(['prefix' => 'withdrawals', 'as' => 'withdrawal.'], function (): void {
                 Route::resource('', 'WithdrawalController')
                     ->parameters(['' => 'withdrawal'])

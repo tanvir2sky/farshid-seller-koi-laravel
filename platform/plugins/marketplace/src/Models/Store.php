@@ -17,6 +17,7 @@ use Botble\Media\Facades\RvMedia;
 use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -109,6 +110,16 @@ class Store extends BaseModel
     public function discounts(): HasMany
     {
         return $this->hasMany(Discount::class, 'store_id');
+    }
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            StoreCategory::class,
+            'mp_store_category_store',
+            'store_id',
+            'store_category_id'
+        );
     }
 
     public function getLogoUrlAttribute(): ?string

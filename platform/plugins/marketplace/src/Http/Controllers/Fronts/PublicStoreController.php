@@ -11,6 +11,7 @@ use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Forms\ContactStoreForm;
 use Botble\Marketplace\Http\Requests\Fronts\CheckStoreUrlRequest;
 use Botble\Marketplace\Models\Store;
+use Botble\Marketplace\Models\StoreCategory;
 use Botble\Media\Facades\RvMedia;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\SeoHelper\SeoOpenGraph;
@@ -28,7 +29,8 @@ class PublicStoreController extends BaseController
         Theme::breadcrumb()
             ->add(__('Stores'), route('public.stores'));
 
-        SeoHelper::setTitle(__('Stores'))->setDescription(__('Stores'));
+        $pageTitle = __('Stores');
+        $pageDescription = __('Stores');
 
         $condition = [];
 
@@ -37,7 +39,43 @@ class PublicStoreController extends BaseController
             $condition[] = ['name', 'LIKE', '%' . $search . '%'];
         }
 
-        $with = ['slugable'];
+        $activeStoreCategory = null;
+
+        $categoryId = $request->query('category', $request->input('category'));
+        if ($categoryId !== null && $categoryId !== '') {
+            $categoryId = (int) $categoryId;
+            if ($categoryId > 0) {
+                $activeStoreCategory = StoreCategory::query()
+                    ->wherePublished()
+                    ->whereKey($categoryId)
+                    ->first();
+            }
+        }
+
+        if ($activeStoreCategory) {
+            Theme::breadcrumb()->add(
+                $activeStoreCategory->name,
+                route('public.stores', array_filter([
+                    'category' => $activeStoreCategory->getKey(),
+                    'q' => $request->query('q'),
+                ]))
+            );
+            $pageTitle = $activeStoreCategory->name . ' — ' . __('Stores');
+            $pageDescription = $activeStoreCategory->description
+                ? Str::limit(strip_tags((string) $activeStoreCategory->description), 300)
+                : $pageTitle;
+        }
+
+        SeoHelper::setTitle($pageTitle)->setDescription($pageDescription);
+
+        $with = [
+            'slugable',
+            'categories' => function ($query): void {
+                $query
+                    ->where('mp_store_categories.status', BaseStatusEnum::PUBLISHED)
+                    ->with('slugable');
+            },
+        ];
         if (EcommerceHelper::isReviewEnabled()) {
             $with['reviews'] = function ($query): void {
                 $query->where([
@@ -47,7 +85,7 @@ class PublicStoreController extends BaseController
             };
         }
 
-        $stores = Store::query()
+        $storesQuery = Store::query()
             ->wherePublished()
             ->where($condition)
             ->with($with)
@@ -57,11 +95,60 @@ class PublicStoreController extends BaseController
                         ->where('is_variation', 0)
                         ->wherePublished();
                 },
-            ])
+            ]);
+
+        if ($activeStoreCategory) {
+            $categoryIds = StoreCategory::getSelfAndDescendantIds($activeStoreCategory);
+            $storesQuery->whereHas('categories', function ($query) use ($categoryIds): void {
+                $query
+                    ->whereIn('mp_store_categories.id', $categoryIds)
+                    ->where('mp_store_categories.status', BaseStatusEnum::PUBLISHED);
+            });
+        }
+
+        $stores = $storesQuery
             ->orderByDesc('created_at')
             ->paginate(12);
 
-        return Theme::scope('marketplace.stores', compact('stores'), MarketplaceHelper::viewPath('stores', false))->render();
+        $storeFilterCategories = StoreCategory::query()
+            ->wherePublished()
+            ->with('slugable')
+            ->orderBy('order')
+            ->get();
+
+        return Theme::scope(
+            'marketplace.stores',
+            compact('stores', 'storeFilterCategories', 'activeStoreCategory'),
+            MarketplaceHelper::viewPath('stores', false)
+        )->render();
+    }
+
+    public function getStoresByCategory(Request $request, string $slug)
+    {
+        $slug = BaseHelper::clean((string) $slug);
+        $categorySlug = $slug !== ''
+            ? SlugHelper::getSlug($slug, SlugHelper::getPrefix(StoreCategory::class, '', false))
+            : null;
+
+        if (! $categorySlug) {
+            abort(404);
+        }
+
+        $category = StoreCategory::query()
+            ->wherePublished()
+            ->whereKey($categorySlug->reference_id)
+            ->first();
+
+        if (! $category) {
+            abort(404);
+        }
+
+        return redirect()->to(
+            route('public.stores', array_filter([
+                'category' => $category->getKey(),
+                'q' => $request->query('q'),
+            ]))
+        );
     }
 
     public function getStore(

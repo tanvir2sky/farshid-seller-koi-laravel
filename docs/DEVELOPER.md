@@ -133,6 +133,24 @@ Each plugin typically includes:
 
 ---
 
+## Marketplace store categories (this project)
+
+Store taxonomy is **custom**: hierarchical **store categories** (many-to-many with stores), separate from **product** categories and from marketplace commission-by-product-category settings.
+
+| Layer | Location |
+|-------|----------|
+| Schema | `platform/plugins/marketplace/database/migrations/` — look for `mp_store_categories` / `mp_store_category_store` (new migrations only on production). |
+| Models | `Botble\Marketplace\Models\StoreCategory`, `Store::categories()` |
+| Admin | Routes `marketplace.store-categories.*` in `platform/plugins/marketplace/routes/base.php`; **table list** + separate create/edit (like Stores), not the split tree layout |
+| Store assignment | `StoreForm` multi-select + `StoreController` syncs pivot; vendor form omits `category_ids` |
+| Public listing | `PublicStoreController::getStores` / `getStoresByCategory`; routes `public.stores`, `public.stores.category` (`{storePrefix}/category/{slug}` before `{storePrefix}/{slug}` so store slugs are not ambiguous) |
+| Theme | Martfury: `platform/themes/martfury/views/marketplace/stores.blade.php`, `includes/store-items.blade.php`; fallback cards: `plugins/marketplace::themes.includes.store-item` |
+| Sitemap | `RenderingSiteMapListener` adds per-store URLs and per–store-category URLs |
+
+Filter/query still supports `?category={slug}` via `request()->query('category')` merged with optional path segment handling in the controller.
+
+---
+
 ## References
 
 - Botble documentation: [https://docs.botble.com](https://docs.botble.com)

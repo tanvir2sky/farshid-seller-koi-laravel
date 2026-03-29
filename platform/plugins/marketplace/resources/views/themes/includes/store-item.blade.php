@@ -30,6 +30,15 @@
                 {{ Html::mailto($store->email) }}
             </p>
         @endif
+
+        @if ($store->relationLoaded('categories') && $store->categories->isNotEmpty())
+            <p class="bb-store-item-categories mb-0 mt-2">
+                @foreach ($store->categories as $storeCat)
+                    @continue(! $storeCat->slug)
+                    <a href="{{ route('public.stores', ['category' => $storeCat->getKey()]) }}" class="badge bg-secondary text-decoration-none me-1">{{ $storeCat->name }}</a>
+                @endforeach
+            </p>
+        @endif
     </div>
 
     <div class="bb-store-item-footer">

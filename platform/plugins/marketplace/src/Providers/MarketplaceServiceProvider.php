@@ -29,6 +29,7 @@ use Botble\Marketplace\Http\Middleware\RedirectIfNotVendor;
 use Botble\Marketplace\Models\Revenue;
 use Botble\Marketplace\Models\Scopes\HideProductsByLockedVendorScope;
 use Botble\Marketplace\Models\Store;
+use Botble\Marketplace\Models\StoreCategory;
 use Botble\Marketplace\Models\VendorInfo;
 use Botble\Marketplace\Models\Withdrawal;
 use Botble\Marketplace\Repositories\Eloquent\RevenueRepository;
@@ -129,8 +130,17 @@ class MarketplaceServiceProvider extends ServiceProvider
                     'permissions' => ['marketplace.store.index'],
                 ])
                 ->registerItem([
-                    'id' => 'cms-plugins-withdrawal',
+                    'id' => 'cms-plugins-store-categories',
                     'priority' => 2,
+                    'parent_id' => 'cms-plugins-marketplace',
+                    'name' => 'plugins/marketplace::store-category.name',
+                    'icon' => null,
+                    'url' => fn () => route('marketplace.store-categories.index'),
+                    'permissions' => ['marketplace.store-category.index'],
+                ])
+                ->registerItem([
+                    'id' => 'cms-plugins-withdrawal',
+                    'priority' => 3,
                     'parent_id' => 'cms-plugins-marketplace',
                     'name' => 'plugins/marketplace::withdrawal.name',
                     'icon' => null,
@@ -139,7 +149,7 @@ class MarketplaceServiceProvider extends ServiceProvider
                 ])
                 ->registerItem([
                     'id' => 'cms-plugins-marketplace-vendors',
-                    'priority' => 4,
+                    'priority' => 5,
                     'parent_id' => 'cms-plugins-marketplace',
                     'name' => 'plugins/marketplace::marketplace.vendors',
                     'icon' => null,
@@ -152,7 +162,7 @@ class MarketplaceServiceProvider extends ServiceProvider
                         $dashboardMenu
                             ->registerItem([
                                 'id' => 'cms-plugins-marketplace-unverified-vendor',
-                                'priority' => 5,
+                                'priority' => 6,
                                 'parent_id' => 'cms-plugins-marketplace',
                                 'name' => 'plugins/marketplace::unverified-vendor.name',
                                 'icon' => null,
@@ -348,9 +358,11 @@ class MarketplaceServiceProvider extends ServiceProvider
         SlugHelper::registering(function (): void {
             SlugHelper::registerModule(Store::class, fn () => trans('plugins/marketplace::store.stores'));
             SlugHelper::setPrefix(Store::class, 'stores');
+            SlugHelper::registerModule(StoreCategory::class, fn () => trans('plugins/marketplace::store-category.name'));
+            SlugHelper::setPrefix(StoreCategory::class, 'store-categories');
         });
 
-        SeoHelper::registerModule([Store::class]);
+        SeoHelper::registerModule([Store::class, StoreCategory::class]);
         SiteMapManager::registerKey('stores');
 
         $this->app->register(EventServiceProvider::class);

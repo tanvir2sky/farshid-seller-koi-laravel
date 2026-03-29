@@ -42,6 +42,13 @@ class StoreTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
+            ->addColumn('store_categories', function ($item) {
+                if ($item->categories->isEmpty()) {
+                    return '&mdash;';
+                }
+
+                return e($item->categories->pluck('name')->implode(', '));
+            })
             ->editColumn('earnings', function ($item) {
                 return $item->customer->id ? format_price($item->customer->balance ?: 0) : '--';
             })
@@ -72,7 +79,7 @@ class StoreTable extends TableAbstract
                 'status',
                 'customer_id',
             ])
-            ->with(['customer', 'customer.vendorInfo'])
+            ->with(['customer', 'customer.vendorInfo', 'categories'])
             ->withCount(['products']);
 
         return $this->applyScopes($query);
@@ -85,6 +92,12 @@ class StoreTable extends TableAbstract
             ImageColumn::make('logo')
                 ->title(trans('plugins/marketplace::store.forms.logo')),
             NameColumn::make()->route('marketplace.store.edit'),
+            Column::make('store_categories')
+                ->title(trans('plugins/marketplace::store.forms.store_categories'))
+                ->alignStart()
+                ->orderable(false)
+                ->searchable(false)
+                ->width(160),
             Column::make('earnings')
                 ->title(trans('plugins/marketplace::marketplace.tables.earnings'))
                 ->alignStart()

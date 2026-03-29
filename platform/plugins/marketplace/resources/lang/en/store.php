@@ -29,6 +29,8 @@ return [
         'zip_code' => 'Zip Code',
         'zip_code_placeholder' => 'Zip Code',
         'tax_id' => 'Tax ID',
+        'store_categories' => 'Store categories',
+        'store_categories_helper' => 'Assign one or more store categories. Manage categories under Marketplace → Store categories.',
     ],
     'control' => [
         'title' => 'Vendor control',

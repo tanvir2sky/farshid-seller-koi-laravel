@@ -8,6 +8,10 @@ if (! defined('STORE_MODULE_SCREEN_NAME')) {
     define('STORE_MODULE_SCREEN_NAME', 'store');
 }
 
+if (! defined('STORE_CATEGORY_MODULE_SCREEN_NAME')) {
+    define('STORE_CATEGORY_MODULE_SCREEN_NAME', 'store-category');
+}
+
 if (! defined('REVENUE_MODULE_SCREEN_NAME')) {
     define('REVENUE_MODULE_SCREEN_NAME', 'revenue');
 }

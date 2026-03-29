@@ -14,6 +14,6 @@ class VendorStoreForm extends StoreForm
         $this
             ->setValidatorClass(VendorStoreRequest::class)
             ->modify('content', CustomEditorField::class)
-            ->remove(['status', 'customer_id']);
+            ->remove(['status', 'customer_id', 'category_ids[]']);
     }
 }

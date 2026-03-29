@@ -4,6 +4,7 @@ namespace Botble\Marketplace\Listeners;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Marketplace\Models\Store;
+use Botble\Marketplace\Models\StoreCategory;
 use Botble\Theme\Events\RenderingSiteMapEvent;
 use Botble\Theme\Facades\SiteMapManager;
 
@@ -27,6 +28,20 @@ class RenderingSiteMapListener
                         }
 
                         SiteMapManager::add($store->url, $store->updated_at, '0.8');
+                    }
+
+                    $storeCategories = StoreCategory::query()
+                        ->where('status', BaseStatusEnum::PUBLISHED)
+                        ->orderBy('order')
+                        ->select(['id', 'name', 'updated_at'])
+                        ->get();
+
+                    foreach ($storeCategories as $storeCategory) {
+                        SiteMapManager::add(
+                            route('public.stores', ['category' => $storeCategory->id]),
+                            $storeCategory->updated_at,
+                            '0.7'
+                        );
                     }
 
                     break;
