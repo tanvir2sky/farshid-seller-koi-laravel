@@ -108,7 +108,9 @@
                     <div class="ps-layout--shop">
                         <div class="ps-layout__left">
                             @if ($hasCategoryFilter)
-                                @include(Theme::getThemeNamespace('views.marketplace.includes.store-product-category-filter'))
+                                <div class="d-none d-md-block">
+                                    @include(Theme::getThemeNamespace('views.marketplace.includes.store-product-category-filter'))
+                                </div>
                             @endif
                             @if ($canContactStore)
                                 <div class="store-contact-form mb-4 bg-light p-4">
@@ -157,6 +159,12 @@
                                         </div>
                                     </form>
                                 </div>
+                                <!-- Mobile Only: Show product categories filter at the top -->
+                                @if ($hasCategoryFilter)
+                                    <div class="d-block d-md-none mb-3">
+                                        @include(Theme::getThemeNamespace('views.marketplace.includes.store-product-category-filter'))
+                                    </div>
+                                @endif
                             </div>
                             <div class="ps-shopping__header">
                                 <p>

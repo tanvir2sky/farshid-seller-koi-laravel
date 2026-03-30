@@ -17,6 +17,8 @@
                 background-color: #fff !important;
                 border-left: 3px solid var(--color-1st, #fcb800);
                 box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+                padding: 5px !important;
+                margin-left: 3px !important;
             }
             body[dir="rtl"] .store-product-categories .store-product-categories__list li.active > a {
                 border-left: none;
