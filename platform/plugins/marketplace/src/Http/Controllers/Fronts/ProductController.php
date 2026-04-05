@@ -6,6 +6,7 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Rules\MediaImageRule;
 use Botble\Ecommerce\Enums\ProductTypeEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
@@ -46,6 +47,14 @@ class ProductController extends BaseController
         $this->pageTitle(__('Products'));
 
         return $table->renderTable();
+    }
+
+    public function destroy(int|string $id, Request $request, BaseHttpResponse $response): BaseHttpResponse
+    {
+        return $response
+            ->setError()
+            ->setCode(403)
+            ->setMessage(trans('core/acl::permissions.access_denied_message'));
     }
 
     public function create()

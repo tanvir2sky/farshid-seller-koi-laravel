@@ -12,9 +12,7 @@ use Botble\Ecommerce\Models\Product;
 use Botble\Marketplace\Exports\ProductExport;
 use Botble\Marketplace\Tables\Traits\ForVendor;
 use Botble\Table\Abstracts\TableAbstract;
-use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
-use Botble\Table\BulkActions\DeleteBulkAction;
 use Botble\Table\BulkChanges\CreatedAtBulkChange;
 use Botble\Table\BulkChanges\NameBulkChange;
 use Botble\Table\BulkChanges\NumberBulkChange;
@@ -46,7 +44,6 @@ class ProductTable extends TableAbstract
             ])
             ->addActions([
                 EditAction::make()->route('marketplace.vendor.products.edit'),
-                DeleteAction::make()->route('marketplace.vendor.products.destroy'),
             ]);
     }
 
@@ -156,9 +153,7 @@ class ProductTable extends TableAbstract
 
     public function bulkActions(): array
     {
-        return [
-            DeleteBulkAction::class,
-        ];
+        return [];
     }
 
     public function getBulkChanges(): array
