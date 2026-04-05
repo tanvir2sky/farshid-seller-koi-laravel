@@ -12,6 +12,7 @@ use Botble\Marketplace\Http\Controllers\Fronts\MessageController;
 use Botble\Marketplace\Http\Controllers\Fronts\SpecificationAttributeController;
 use Botble\Marketplace\Http\Controllers\Fronts\SpecificationGroupController;
 use Botble\Marketplace\Http\Controllers\Fronts\SpecificationTableController;
+use Botble\Marketplace\Http\Controllers\Fronts\StopVendorImpersonationController;
 use Botble\Marketplace\Http\Controllers\Vendor\LanguageSettingController;
 use Botble\Marketplace\Http\Middleware\LocaleMiddleware;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +23,9 @@ Route::group([
     'as' => 'marketplace.vendor.',
     'middleware' => ['web', 'core', 'vendor', LocaleMiddleware::class],
 ], function (): void {
+    Route::post('admin-impersonation/stop', StopVendorImpersonationController::class)
+        ->name('admin-impersonation.stop');
+
     Route::get('tags/all', [ProductTagController::class, 'getAllTags'])->name('tags.all');
 
     require core_path('table/routes/web-actions.php');

@@ -150,4 +150,11 @@ return [
         'published' => 'Approved',
         'blocked' => 'Blocked',
     ],
+    'impersonation' => [
+        'login_as_vendor' => 'Login as vendor',
+        'banner' => 'You are viewing the vendor panel as an administrator (:store).',
+        'return_to_admin' => 'Return to admin',
+        'started' => 'Opened vendor dashboard as :store.',
+        'stopped' => 'You left the vendor session.',
+    ],
 ];

@@ -3,6 +3,7 @@
 namespace Botble\Marketplace\Http\Middleware;
 
 use Botble\Marketplace\Facades\MarketplaceHelper;
+use Botble\Marketplace\Supports\VendorImpersonation;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +22,10 @@ class RedirectIfNotVendor
 
         if (MarketplaceHelper::getSetting('verify_vendor', true) &&
             ! Auth::guard($guard)->user()->vendor_verified_at) {
+            if (VendorImpersonation::isActive()) {
+                return $next($request);
+            }
+
             if ($request->ajax() || $request->wantsJson()) {
                 return response(__('Vendor account is not verified.'), 403);
             }

@@ -2,6 +2,7 @@
 
 use Botble\Base\Facades\AdminHelper;
 use Botble\Marketplace\Http\Controllers\VendorBlockedController;
+use Botble\Marketplace\Http\Controllers\VendorImpersonationController;
 use Botble\Marketplace\Http\Controllers\WithdrawalInvoiceController;
 use Illuminate\Support\Facades\Route;
 
@@ -9,6 +10,10 @@ AdminHelper::registerRoutes(function (): void {
     Route::group(['namespace' => 'Botble\Marketplace\Http\Controllers'], function (): void {
         Route::group(['prefix' => 'marketplaces', 'as' => 'marketplace.'], function (): void {
             Route::group(['prefix' => 'stores', 'as' => 'store.'], function (): void {
+                Route::post('{store}/login-as-vendor', [VendorImpersonationController::class, 'store'])
+                    ->name('login-as-vendor')
+                    ->permission('marketplace.store.impersonate_vendor');
+
                 Route::resource('', 'StoreController')->parameters(['' => 'store']);
                 Route::post('update-tax-info/{store}', [
                     'as' => 'update-tax-info',

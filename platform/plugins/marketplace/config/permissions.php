@@ -32,6 +32,11 @@ return [
         'parent_flag' => 'marketplace.store.index',
     ],
     [
+        'name' => 'Login as vendor',
+        'flag' => 'marketplace.store.impersonate_vendor',
+        'parent_flag' => 'marketplace.store.index',
+    ],
+    [
         'name' => 'Update balance',
         'flag' => 'marketplace.store.revenue.create',
         'parent_flag' => 'marketplace.store.index',

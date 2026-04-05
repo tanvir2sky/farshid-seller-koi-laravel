@@ -99,6 +99,8 @@
         class="ps-main__wrapper"
         id="vendor-dashboard"
     >
+        @include(MarketplaceHelper::viewPath('vendor-dashboard.partials.admin-impersonation-banner'))
+
         <header class="d-flex justify-content-between align-items-center mb-3">
             <h3 class="fs-1 mb-0 text-truncate me-3">{{ page_title()->getTitle(false) }}</h3>
             <div class="d-flex align-items-center gap-4">

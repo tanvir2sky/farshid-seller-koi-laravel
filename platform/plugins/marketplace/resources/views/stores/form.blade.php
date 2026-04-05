@@ -25,6 +25,28 @@
                 {!! apply_filters(BASE_FILTER_REGISTER_CONTENT_TABS, null, $store) !!}
                 {!! apply_filters('marketplace_vendor_settings_register_content_tabs', null, $store) !!}
             </x-core::tab>
+
+            @if ($store && $store->getKey()
+                && $store->customer?->is_vendor
+                && auth()->check()
+                && (auth()->user()->isSuperUser() || auth()->user()->hasPermission('marketplace.store.impersonate_vendor')))
+                <div class="card-header-actions mt-2">
+                    <form
+                        action="{{ route('marketplace.store.login-as-vendor', $store) }}"
+                        method="post"
+                        class="d-inline"
+                    >
+                        @csrf
+                        <x-core::button
+                            type="submit"
+                            color="primary"
+                            icon="ti ti-login"
+                        >
+                            {{ trans('plugins/marketplace::marketplace.impersonation.login_as_vendor') }}
+                        </x-core::button>
+                    </form>
+                </div>
+            @endif
         </x-core::card.header>
 
         <x-core::card.body>
