@@ -42,6 +42,8 @@ class ProductRequest extends Request
         $this->merge([
             'options' => $options,
             'notify_attachment_updated' => $this->boolean('notify_attachment_updated'),
+            'has_price_range' => $this->boolean('has_price_range'),
+            'max_price' => $this->boolean('has_price_range') ? $this->input('max_price') : null,
         ]);
     }
 
@@ -55,8 +57,19 @@ class ProductRequest extends Request
                 'numeric',
                 'nullable',
                 'min:0',
+                Rule::requiredIf($this->boolean('has_price_range')),
                 Rule::when($this->input('sale_price'), function () {
                     return 'gte:sale_price';
+                }),
+            ],
+            'has_price_range' => ['nullable', 'bool'],
+            'max_price' => [
+                'numeric',
+                'nullable',
+                'min:0',
+                Rule::requiredIf($this->boolean('has_price_range')),
+                Rule::when($this->input('price'), function () {
+                    return 'gte:price';
                 }),
             ],
             'sale_price' => ['numeric', 'nullable', 'min:0'],

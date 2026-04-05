@@ -52,7 +52,18 @@
                                 <td class="heading">{{ __('Price') }}</td>
                                 @foreach($products as $product)
                                     <td>
-                                        <h4 class="price @if ($product->front_sale_price !== $product->price) sale @endif"><span>{{ format_price($product->front_sale_price_with_taxes) }}</span> @if ($product->front_sale_price !== $product->price) &nbsp;<del>{{ format_price($product->price_with_taxes) }} </del> <small>({{ get_sale_percentage($product->price, $product->front_sale_price) }})</small> @endif</h4>
+                                        @if ($product->hasPriceRange())
+                                            @php
+                                                $maxPrice = $product->max_price;
+
+                                                if (EcommerceHelper::isDisplayProductIncludingTaxes()) {
+                                                    $maxPrice += $maxPrice * ($product->total_taxes_percentage / 100);
+                                                }
+                                            @endphp
+                                            <h4 class="price"><span>{{ format_price($product->price_with_taxes) }} - {{ format_price($maxPrice) }}</span></h4>
+                                        @else
+                                            <h4 class="price @if ($product->front_sale_price !== $product->price) sale @endif"><span>{{ format_price($product->front_sale_price_with_taxes) }}</span> @if ($product->front_sale_price !== $product->price) &nbsp;<del>{{ format_price($product->price_with_taxes) }} </del> <small>({{ get_sale_percentage($product->price, $product->front_sale_price) }})</small> @endif</h4>
+                                        @endif
                                     </td>
                                 @endforeach
                             </tr>

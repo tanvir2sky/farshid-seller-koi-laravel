@@ -82,6 +82,12 @@ class PublicCartController extends BaseController
 
         $originalProduct = $product->original_product;
 
+        if ($product->hasPriceRange() || $originalProduct->hasPriceRange()) {
+            return $response
+                ->setError()
+                ->setMessage(trans('plugins/ecommerce::products.price_range_contact_store_owner'));
+        }
+
         if ($product->isOutOfStock()) {
             return $response
                 ->setError()

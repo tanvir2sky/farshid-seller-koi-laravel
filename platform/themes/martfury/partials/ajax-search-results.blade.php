@@ -20,7 +20,18 @@
                         @endif
                     @endif
                     @if (! EcommerceHelper::hideProductPrice() || EcommerceHelper::isCartEnabled())
-                        <p class="ps-product__price @if ($product->front_sale_price !== $product->price) sale @endif">{{ format_price($product->front_sale_price_with_taxes) }} @if ($product->front_sale_price !== $product->price) <del>{{ format_price($product->price_with_taxes) }} </del> @endif</p>
+                        @if ($product->hasPriceRange())
+                            @php
+                                $maxPrice = $product->max_price;
+
+                                if (EcommerceHelper::isDisplayProductIncludingTaxes()) {
+                                    $maxPrice += $maxPrice * ($product->total_taxes_percentage / 100);
+                                }
+                            @endphp
+                            <p class="ps-product__price">{{ format_price($product->price_with_taxes) }} - {{ format_price($maxPrice) }}</p>
+                        @else
+                            <p class="ps-product__price @if ($product->front_sale_price !== $product->price) sale @endif">{{ format_price($product->front_sale_price_with_taxes) }} @if ($product->front_sale_price !== $product->price) <del>{{ format_price($product->price_with_taxes) }} </del> @endif</p>
+                        @endif
                     @endif
                 </div>
             </div>

@@ -22,7 +22,18 @@
             @endif
         </div>
         @if (! EcommerceHelper::hideProductPrice() || EcommerceHelper::isCartEnabled())
-            <h4 class="ps-product__price @if ($product->front_sale_price !== $product->price) sale @endif"><span>{{ format_price($product->front_sale_price_with_taxes) }}</span> @if ($product->front_sale_price !== $product->price) <del>{{ format_price($product->price_with_taxes) }} </del> @endif</h4>
+            @if ($product->hasPriceRange())
+                @php
+                    $maxPrice = $product->max_price;
+
+                    if (EcommerceHelper::isDisplayProductIncludingTaxes()) {
+                        $maxPrice += $maxPrice * ($product->total_taxes_percentage / 100);
+                    }
+                @endphp
+                <h4 class="ps-product__price"><span>{{ format_price($product->price_with_taxes) }} - {{ format_price($maxPrice) }}</span></h4>
+            @else
+                <h4 class="ps-product__price @if ($product->front_sale_price !== $product->price) sale @endif"><span>{{ format_price($product->front_sale_price_with_taxes) }}</span> @if ($product->front_sale_price !== $product->price) <del>{{ format_price($product->price_with_taxes) }} </del> @endif</h4>
+            @endif
         @endif
         <div class="ps-product__desc">
             <div class="ps-list--dot">

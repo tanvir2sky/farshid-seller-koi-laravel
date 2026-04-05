@@ -83,6 +83,13 @@ class CartController extends BaseController
 
         $originalProduct = $product->original_product;
 
+        if ($product->hasPriceRange() || $originalProduct->hasPriceRange()) {
+            return $response
+                ->setError()
+                ->setMessage(trans('plugins/ecommerce::products.price_range_contact_store_owner'))
+                ->toApiResponse();
+        }
+
         if ($product->isOutOfStock()) {
             return $response
                 ->setError()
@@ -239,6 +246,14 @@ class CartController extends BaseController
 
         if (! $rowId) {
             $originalProduct = $product->original_product;
+
+            if ($product->hasPriceRange() || $originalProduct->hasPriceRange()) {
+                return response()->json([
+                    'id' => $identifier,
+                    'error' => true,
+                    'message' => trans('plugins/ecommerce::products.price_range_contact_store_owner'),
+                ]);
+            }
 
             $cartItems = OrderHelper::handleAddCart($product, $request);
 

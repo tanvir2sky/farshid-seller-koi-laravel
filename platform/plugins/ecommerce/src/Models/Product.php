@@ -58,6 +58,7 @@ class Product extends BaseModel
         'is_variation',
         'sale_type',
         'price',
+        'max_price',
         'sale_price',
         'start_date',
         'end_date',
@@ -87,6 +88,7 @@ class Product extends BaseModel
         'stock_status' => StockStatusEnum::class,
         'product_type' => ProductTypeEnum::class,
         'price' => 'float',
+        'max_price' => 'float',
         'sale_price' => 'float',
         'name' => SafeContent::class,
         'description' => SafeContent::class,
@@ -447,6 +449,11 @@ class Product extends BaseModel
         }
 
         return $this->allow_checkout_when_out_of_stock;
+    }
+
+    public function hasPriceRange(): bool
+    {
+        return ! is_null($this->max_price) && (float) $this->max_price > 0;
     }
 
     public function promotions(): BelongsToMany

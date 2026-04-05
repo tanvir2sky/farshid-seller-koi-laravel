@@ -23,6 +23,10 @@
         @endif
     </div>
 
+    @php
+        $hasPriceRange = old('has_price_range', ! is_null($product?->max_price ?? $originalProduct?->max_price));
+    @endphp
+
     <div class="col-md-4">
         <x-core::form.text-input
             :label="trans('plugins/ecommerce::products.form.price')"
@@ -30,6 +34,35 @@
             :data-thousands-separator="EcommerceHelper::getThousandSeparatorForInputMask()"
             :data-decimal-separator="EcommerceHelper::getDecimalSeparatorForInputMask()"
             :value="old('price', $product ? $product->price : $originalProduct->price ?? 0)"
+            step="any"
+            class="input-mask-number"
+            :group-flat="true"
+            :helper-text="trans('plugins/ecommerce::products.form.price_range_min_price_helper')"
+        >
+            <x-slot:prepend>
+                <span class="input-group-text">{{ get_application_currency()->symbol }}</span>
+            </x-slot:prepend>
+            <x-slot:labelDescription>
+                <x-core::form.checkbox
+                    :label="trans('plugins/ecommerce::products.form.add_price_range')"
+                    name="has_price_range"
+                    value="1"
+                    :checked="$hasPriceRange"
+                    :inline="true"
+                />
+            </x-slot:labelDescription>
+        </x-core::form.text-input>
+    </div>
+    <div
+        class="col-md-4 js-max-price-wrapper"
+        @style(['display: none' => ! $hasPriceRange])
+    >
+        <x-core::form.text-input
+            :label="trans('plugins/ecommerce::products.form.max_price')"
+            name="max_price"
+            :data-thousands-separator="EcommerceHelper::getThousandSeparatorForInputMask()"
+            :data-decimal-separator="EcommerceHelper::getDecimalSeparatorForInputMask()"
+            :value="old('max_price', $product ? $product->max_price : $originalProduct->max_price ?? null)"
             step="any"
             class="input-mask-number"
             :group-flat="true"
@@ -129,6 +162,68 @@
         />
     </div>
 </div>
+
+@if (request()->ajax())
+    <script>
+        (function() {
+            const bindPriceRange = (scope) => {
+                const checkboxes = scope.querySelectorAll('input[type="checkbox"][name="has_price_range"]');
+
+                checkboxes.forEach((checkbox) => {
+                    const priceGroup = checkbox.closest('.price-group');
+                    if (!priceGroup) {
+                        return;
+                    }
+
+                    const maxPriceWrapper = priceGroup.querySelector('.js-max-price-wrapper');
+                    if (!maxPriceWrapper) {
+                        return;
+                    }
+
+                    const toggle = () => {
+                        maxPriceWrapper.style.display = checkbox.checked ? '' : 'none';
+                    };
+
+                    toggle();
+                    checkbox.addEventListener('change', toggle);
+                });
+            };
+
+            bindPriceRange(document);
+        })();
+    </script>
+@else
+    @pushOnce('footer')
+        <script>
+            (function() {
+                const bindPriceRange = (scope) => {
+                    const checkboxes = scope.querySelectorAll('input[type="checkbox"][name="has_price_range"]');
+
+                    checkboxes.forEach((checkbox) => {
+                        const priceGroup = checkbox.closest('.price-group');
+                        if (!priceGroup) {
+                            return;
+                        }
+
+                        const maxPriceWrapper = priceGroup.querySelector('.js-max-price-wrapper');
+                        if (!maxPriceWrapper) {
+                            return;
+                        }
+
+                        const toggle = () => {
+                            maxPriceWrapper.style.display = checkbox.checked ? '' : 'none';
+                        };
+
+                        toggle();
+                        checkbox.addEventListener('change', toggle);
+                    });
+                };
+
+                document.addEventListener('DOMContentLoaded', () => bindPriceRange(document));
+            })();
+        </script>
+    @endpushOnce
+@endif
 
 {!! apply_filters('ecommerce_product_variation_form_middle', null, $product) !!}
 

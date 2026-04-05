@@ -42,7 +42,20 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="price" data-label="{{ __('Price') }}"><span>{{ format_price($product->front_sale_price_with_taxes) }}</span> @if ($product->front_sale_price !== $product->price) &nbsp;<del>{{ format_price($product->price_with_taxes) }} </del> @endif</td>
+                                    <td class="price" data-label="{{ __('Price') }}">
+                                        @if ($product->hasPriceRange())
+                                            @php
+                                                $maxPrice = $product->max_price;
+
+                                                if (EcommerceHelper::isDisplayProductIncludingTaxes()) {
+                                                    $maxPrice += $maxPrice * ($product->total_taxes_percentage / 100);
+                                                }
+                                            @endphp
+                                            <span>{{ format_price($product->price_with_taxes) }} - {{ format_price($maxPrice) }}</span>
+                                        @else
+                                            <span>{{ format_price($product->front_sale_price_with_taxes) }}</span> @if ($product->front_sale_price !== $product->price) &nbsp;<del>{{ format_price($product->price_with_taxes) }} </del> @endif
+                                        @endif
+                                    </td>
                                     @if (EcommerceHelper::isCartEnabled())
                                         <td data-label="{{ __('Action') }}">
                                             <div class="ps-product p-0 border-0">
