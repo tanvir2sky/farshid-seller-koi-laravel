@@ -69,6 +69,16 @@ return [
         'parent_flag' => 'marketplace.index',
     ],
     [
+        'name' => 'Messages',
+        'flag' => 'marketplace.messages.index',
+        'parent_flag' => 'marketplace.index',
+    ],
+    [
+        'name' => 'View',
+        'flag' => 'marketplace.messages.view',
+        'parent_flag' => 'marketplace.messages.index',
+    ],
+    [
         'name' => 'Edit',
         'flag' => 'marketplace.withdrawal.edit',
         'parent_flag' => 'marketplace.withdrawal.index',

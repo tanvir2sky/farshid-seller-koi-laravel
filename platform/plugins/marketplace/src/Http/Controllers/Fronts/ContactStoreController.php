@@ -54,10 +54,22 @@ class ContactStoreController extends BaseController
         Message::query()->create([
             'store_id' => $store->getKey(),
             'customer_id' => auth('customer')->id(),
+            'sender_type' => auth('customer')->check() ? Message::SENDER_CUSTOMER : Message::SENDER_GUEST,
+            'sender_id' => auth('customer')->id(),
             'name' => $emailVariables['customer_name'],
             'email' => $emailVariables['customer_email'],
             'content' => $request->input('content'),
         ]);
+
+        if (auth('customer')->id()) {
+            Message::query()
+                ->where('store_id', $store->getKey())
+                ->where('customer_id', auth('customer')->id())
+                ->update([
+                    'customer_archived_at' => null,
+                    'vendor_archived_at' => null,
+                ]);
+        }
 
         EmailHandler::setModule(MARKETPLACE_MODULE_SCREEN_NAME)
             ->setVariableValues($emailVariables)
@@ -65,6 +77,11 @@ class ContactStoreController extends BaseController
 
         return $this
             ->httpResponse()
+            ->setData(
+                auth('customer')->check()
+                    ? ['next_url' => route('customer.messages.show', $store->getKey())]
+                    : []
+            )
             ->setMessage(__('Send message successfully!'));
     }
 }

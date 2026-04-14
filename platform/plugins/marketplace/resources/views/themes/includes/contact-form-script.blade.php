@@ -25,6 +25,12 @@
                             Theme.showError(response.message);
                         } else {
                             Theme.showSuccess(response.message);
+
+                            if (response.data && response.data.next_url) {
+                                window.setTimeout(function () {
+                                    window.location.href = response.data.next_url;
+                                }, 400);
+                            }
                         }
                     }
                 },

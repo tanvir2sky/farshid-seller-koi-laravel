@@ -148,6 +148,15 @@ class MarketplaceServiceProvider extends ServiceProvider
                     'permissions' => ['marketplace.withdrawal.index'],
                 ])
                 ->registerItem([
+                    'id' => 'cms-plugins-marketplace-messages',
+                    'priority' => 4,
+                    'parent_id' => 'cms-plugins-marketplace',
+                    'name' => __('Messages'),
+                    'icon' => null,
+                    'url' => fn () => route('marketplace.messages.index'),
+                    'permissions' => ['marketplace.messages.index'],
+                ])
+                ->registerItem([
                     'id' => 'cms-plugins-marketplace-vendors',
                     'priority' => 5,
                     'parent_id' => 'cms-plugins-marketplace',
@@ -297,6 +306,16 @@ class MarketplaceServiceProvider extends ServiceProvider
 
         DashboardMenu::for('customer')->beforeRetrieving(function (): void {
             DashboardMenu::make()
+                ->when(MarketplaceHelper::isEnabledMessagingSystem(), function () {
+                    return DashboardMenu::make()
+                        ->registerItem([
+                            'id' => 'customer.messages',
+                            'priority' => 35,
+                            'name' => __('Messages'),
+                            'url' => fn () => route('customer.messages.index'),
+                            'icon' => 'ti ti-messages',
+                        ]);
+                })
                 ->when(auth('customer')->user()->is_vendor, function () {
                     return DashboardMenu::make()
                         ->registerItem([

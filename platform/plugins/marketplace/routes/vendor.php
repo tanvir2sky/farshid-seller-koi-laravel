@@ -98,9 +98,12 @@ Route::group([
         ])->wherePrimaryKey();
     });
 
-    Route::match(['GET', 'POST'], 'messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::get('messages', [MessageController::class, 'index'])->name('messages.index');
     Route::get('messages/{message}', [MessageController::class, 'show'])->name('messages.show');
-    Route::delete('messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
+    Route::post('messages/{message}', [MessageController::class, 'reply'])->name('messages.reply');
+    Route::post('messages/{message}/archive', [MessageController::class, 'archive'])->name('messages.archive');
+    Route::post('messages/{message}/unarchive', [MessageController::class, 'unarchive'])->name('messages.unarchive');
+    Route::get('messages/{message}/refresh', [MessageController::class, 'refresh'])->name('messages.refresh');
 
     if (EcommerceHelper::isReviewEnabled()) {
         Route::resource('reviews', 'ReviewController')

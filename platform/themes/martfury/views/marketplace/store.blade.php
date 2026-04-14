@@ -125,8 +125,24 @@
                             @endif
                             @if ($canContactStore)
                                 <div class="store-contact-form mb-4 bg-light p-4">
-                                    <h3 class="fs-4">{{ __('Email :store', ['store' => $store->name]) }}</h3>
-                                    <p>{{ __('All messages are recorded and spam is not tolerated. Your email address will be shown to the recipient.') }}</p>
+                                    <h3 class="fs-4">
+                                        {{ auth('customer')->check() ? __('Message :store', ['store' => $store->name]) : __('Email :store', ['store' => $store->name]) }}
+                                    </h3>
+
+                                    @if (auth('customer')->check())
+                                        <p>{{ __('Your conversation with this store will open after the first message. New replies appear automatically while you are on the message page.') }}</p>
+
+                                        @if (auth('customer')->id() && $store->id != auth('customer')->user()->store->id)
+                                            <p class="mb-3">
+                                                <a class="text-link" href="{{ route('customer.messages.show', $store->getKey()) }}">
+                                                    {{ __('Open conversation') }}
+                                                </a>
+                                            </p>
+                                        @endif
+                                    @else
+                                        <p>{{ __('All messages are recorded and spam is not tolerated. Your email address will be shown to the recipient.') }}</p>
+                                    @endif
+
                                     {!!
                                         $contactForm
                                             ->setFormOption('class', 'ps-form--contact-us contact-form bb-contact-store-form')

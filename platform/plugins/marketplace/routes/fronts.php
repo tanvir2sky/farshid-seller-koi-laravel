@@ -8,6 +8,7 @@ use Botble\Ecommerce\Http\Controllers\PrintShippingLabelController;
 use Botble\Ecommerce\Http\Middleware\CheckProductSpecificationEnabledMiddleware;
 use Botble\Marketplace\Http\Controllers\Fronts\BecomeVendorController;
 use Botble\Marketplace\Http\Controllers\Fronts\ContactStoreController;
+use Botble\Marketplace\Http\Controllers\Fronts\CustomerMessageController;
 use Botble\Marketplace\Http\Controllers\Fronts\ExportProductController;
 use Botble\Marketplace\Http\Controllers\Fronts\ImportProductController;
 use Botble\Marketplace\Http\Controllers\Fronts\MessageController;
@@ -46,6 +47,14 @@ Route::group([
             Route::get('download-certificate', [BecomeVendorController::class, 'downloadCertificate'])->name('become-vendor.download-certificate');
             Route::get('download-government-id', [BecomeVendorController::class, 'downloadGovernmentId'])->name('become-vendor.download-government-id');
         });
+
+        Route::middleware('customer')->prefix('customer/messages')->name('customer.messages.')->group(function (): void {
+            Route::get('/', [CustomerMessageController::class, 'index'])->name('index');
+            Route::get('{store}', [CustomerMessageController::class, 'show'])->name('show')->wherePrimaryKey('store');
+            Route::post('{store}', [CustomerMessageController::class, 'store'])->name('store')->wherePrimaryKey('store');
+            Route::post('{store}/archive', [CustomerMessageController::class, 'archive'])->name('archive')->wherePrimaryKey('store');
+            Route::post('{store}/unarchive', [CustomerMessageController::class, 'unarchive'])->name('unarchive')->wherePrimaryKey('store');
+            Route::get('{store}/refresh', [CustomerMessageController::class, 'refresh'])->name('refresh')->wherePrimaryKey('store');
+        });
     });
 });
-

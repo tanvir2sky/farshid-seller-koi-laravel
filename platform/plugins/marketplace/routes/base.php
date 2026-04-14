@@ -1,6 +1,7 @@
 <?php
 
 use Botble\Base\Facades\AdminHelper;
+use Botble\Marketplace\Http\Controllers\MessageController;
 use Botble\Marketplace\Http\Controllers\VendorBlockedController;
 use Botble\Marketplace\Http\Controllers\VendorImpersonationController;
 use Botble\Marketplace\Http\Controllers\WithdrawalInvoiceController;
@@ -66,6 +67,16 @@ AdminHelper::registerRoutes(function (): void {
 
                 Route::get('{withdrawal}/invoice', [WithdrawalInvoiceController::class, '__invoke'])
                     ->name('invoice');
+            });
+
+            Route::group(['prefix' => 'messages', 'as' => 'messages.'], function (): void {
+                Route::get('/', [MessageController::class, 'index'])
+                    ->name('index')
+                    ->permission('marketplace.messages.index');
+
+                Route::get('{message}', [MessageController::class, 'show'])
+                    ->name('show')
+                    ->permission('marketplace.messages.view');
             });
 
             Route::get('settings', [
