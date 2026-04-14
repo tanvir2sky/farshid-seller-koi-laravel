@@ -16,8 +16,9 @@ use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\EditorField;
 use Botble\Base\Forms\Fields\EmailField;
 use Botble\Base\Forms\Fields\HtmlField;
-use Botble\Base\Forms\Fields\MultiCheckListField;
 use Botble\Base\Forms\Fields\MediaImageField;
+use Botble\Base\Forms\Fields\MultiCheckListField;
+use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextareaField;
 use Botble\Base\Forms\Fields\TextField;
@@ -118,6 +119,20 @@ class StoreForm extends FormAbstract
                 ],
                 'colspan' => 3,
             ])
+            ->when(! $this instanceof VendorStoreForm, function (StoreForm $form): void {
+                $form->add('priority', NumberField::class, [
+                    'label' => trans('plugins/marketplace::store.forms.priority'),
+                    'value' => $this->getModel()->priority ?? 0,
+                    'help_block' => [
+                        'text' => trans('plugins/marketplace::store.forms.priority_helper'),
+                    ],
+                    'attr' => [
+                        'min' => 0,
+                        'step' => 1,
+                    ],
+                    'colspan' => 3,
+                ]);
+            })
             ->add('customer_id', SelectField::class, [
                 'label' => trans('plugins/marketplace::store.forms.store_owner'),
                 'required' => true,

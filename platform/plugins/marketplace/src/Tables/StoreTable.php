@@ -75,11 +75,14 @@ class StoreTable extends TableAbstract
                 'id',
                 'logo',
                 'name',
+                'priority',
                 'created_at',
                 'status',
                 'customer_id',
             ])
             ->with(['customer', 'customer.vendorInfo', 'categories'])
+            ->orderByDesc('priority')
+            ->orderByDesc('created_at')
             ->withCount(['products']);
 
         return $this->applyScopes($query);
@@ -108,6 +111,9 @@ class StoreTable extends TableAbstract
                 ->title(trans('plugins/marketplace::marketplace.tables.products_count'))
                 ->orderable(false)
                 ->searchable(false),
+            Column::make('priority')
+                ->title(trans('plugins/marketplace::store.forms.priority'))
+                ->width(90),
             Column::make('customer_name')
                 ->title(trans('plugins/marketplace::marketplace.vendor'))
                 ->alignStart()
@@ -144,6 +150,11 @@ class StoreTable extends TableAbstract
                 'type' => 'select',
                 'choices' => BaseStatusEnum::labels(),
                 'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
+            ],
+            'priority' => [
+                'title' => trans('plugins/marketplace::store.forms.priority'),
+                'type' => 'number',
+                'validate' => 'nullable|integer|min:0|max:1000000',
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),

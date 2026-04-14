@@ -24,6 +24,8 @@ return [
         'store' => 'Store',
         'select_store' => 'Select a store...',
         'is_vendor' => 'Is vendor?',
+        'priority' => 'Priority',
+        'priority_helper' => 'Higher numbers appear first on the public stores listing.',
         'company' => 'Company',
         'company_placeholder' => 'Company',
         'zip_code' => 'Zip Code',

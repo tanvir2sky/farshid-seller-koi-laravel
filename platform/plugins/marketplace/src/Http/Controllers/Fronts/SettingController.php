@@ -83,7 +83,7 @@ class SettingController extends BaseController
                 }
             }
 
-            $store->fill($request->input());
+            $store->fill(collect($request->input())->except(['priority'])->all());
             $store->save();
 
             $request->merge(['is_slug_editable' => 1]);

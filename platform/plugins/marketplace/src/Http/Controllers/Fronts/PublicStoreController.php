@@ -108,6 +108,7 @@ class PublicStoreController extends BaseController
         }
 
         $stores = $storesQuery
+            ->orderByDesc('priority')
             ->orderByDesc('created_at')
             ->paginate(12);
 

@@ -51,6 +51,7 @@ class StoreRequest extends Request
             'customer_id' => ['required', 'string', 'exists:ec_customers,id'],
             'description' => ['nullable', 'max:400', 'string'],
             'status' => Rule::in(BaseStatusEnum::values()),
+            'priority' => ['nullable', 'integer', 'min:0', 'max:1000000'],
             'company' => ['nullable', 'string', 'max:255'],
             'tax_id' => ['nullable', 'string', 'max:255'],
             'zip_code' => ['nullable', ...BaseHelper::getZipcodeValidationRule(true)],

@@ -113,6 +113,7 @@
                 $storeProductFilterCategoryNames = $storeProductFilterCategoryNames ?? [];
                 $hasCategoryFilter = $storeProductCategories->isNotEmpty();
                 $useStoreSidebar = $canContactStore || $hasCategoryFilter;
+                $storeContactBreakpoint = 992;
             @endphp
             <div class="ps-section__wrapper">
                 @if ($useStoreSidebar)
@@ -124,46 +125,74 @@
                                 </div>
                             @endif
                             @if ($canContactStore)
-                                <div class="store-contact-form mb-4 bg-light p-4">
-                                    <h3 class="fs-4">
-                                        {{ auth('customer')->check() ? __('Message :store', ['store' => $store->name]) : __('Email :store', ['store' => $store->name]) }}
-                                    </h3>
+                                <div id="store-contact-sidebar-slot">
+                                    <div
+                                        id="store-contact-section"
+                                        class="store-contact-form mb-4 bg-light p-4"
+                                    >
+                                        <h3 class="fs-4">
+                                            {{ auth('customer')->check() ? __('Message :store', ['store' => $store->name]) : __('Email :store', ['store' => $store->name]) }}
+                                        </h3>
 
-                                    @if (auth('customer')->check())
-                                        <p>{{ __('Your conversation with this store will open after the first message. New replies appear automatically while you are on the message page.') }}</p>
+                                        @if (auth('customer')->check())
+                                            <p>{{ __('Your conversation with this store will open after the first message. New replies appear automatically while you are on the message page.') }}</p>
 
-                                        @if (auth('customer')->id() && $store->id != auth('customer')->user()->store->id)
-                                            <p class="mb-3">
-                                                <a class="text-link" href="{{ route('customer.messages.show', $store->getKey()) }}">
-                                                    {{ __('Open conversation') }}
-                                                </a>
-                                            </p>
+                                            @if (auth('customer')->id() && $store->id != auth('customer')->user()->store->id)
+                                                <p class="mb-3">
+                                                    <a class="text-link" href="{{ route('customer.messages.show', $store->getKey()) }}">
+                                                        {{ __('Open conversation') }}
+                                                    </a>
+                                                </p>
+                                            @endif
+                                        @else
+                                            <p>{{ __('All messages are recorded and spam is not tolerated. Your email address will be shown to the recipient.') }}</p>
                                         @endif
-                                    @else
-                                        <p>{{ __('All messages are recorded and spam is not tolerated. Your email address will be shown to the recipient.') }}</p>
-                                    @endif
 
-                                    {!!
-                                        $contactForm
-                                            ->setFormOption('class', 'ps-form--contact-us contact-form bb-contact-store-form')
-                                            ->setFormInputClass('form-control')
-                                            ->setFormLabelClass('d-none sr-only')
-                                            ->modify(
-                                                'submit',
-                                                'submit',
-                                                Botble\Base\Forms\FieldOptions\ButtonFieldOption::make()
-                                                    ->addAttribute('data-bb-loading', 'button-loading')
-                                                    ->cssClass('ps-btn')
-                                                    ->label(__('Send message'))
-                                                    ->wrapperAttributes(['class' => 'form-group submit'])
-                                                    ->toArray(),
-                                                true
-                                            )
-                                            ->renderForm()
-                                    !!}
+                                        {!!
+                                            $contactForm
+                                                ->setFormOption('class', 'ps-form--contact-us contact-form bb-contact-store-form')
+                                                ->setFormInputClass('form-control')
+                                                ->setFormLabelClass('d-none sr-only')
+                                                ->modify(
+                                                    'submit',
+                                                    'submit',
+                                                    Botble\Base\Forms\FieldOptions\ButtonFieldOption::make()
+                                                        ->addAttribute('data-bb-loading', 'button-loading')
+                                                        ->cssClass('ps-btn')
+                                                        ->label(__('Send message'))
+                                                        ->wrapperAttributes(['class' => 'form-group submit'])
+                                                        ->toArray(),
+                                                    true
+                                                )
+                                                ->renderForm()
+                                        !!}
+                                    </div>
                                 </div>
 
                                 @include(MarketplaceHelper::viewPath('includes.contact-form-script'))
+
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        var contactSection = document.getElementById('store-contact-section');
+                                        var desktopSlot = document.getElementById('store-contact-sidebar-slot');
+                                        var mobileSlot = document.getElementById('store-contact-mobile-slot');
+
+                                        if (!contactSection || !desktopSlot || !mobileSlot) {
+                                            return;
+                                        }
+
+                                        var syncStoreContactSection = function () {
+                                            var targetSlot = window.innerWidth < {{ $storeContactBreakpoint }} ? mobileSlot : desktopSlot;
+
+                                            if (contactSection.parentElement !== targetSlot) {
+                                                targetSlot.appendChild(contactSection);
+                                            }
+                                        };
+
+                                        syncStoreContactSection();
+                                        window.addEventListener('resize', syncStoreContactSection);
+                                    });
+                                </script>
                             @endif
                         </div>
                         <div class="ps-layout__right">
@@ -193,6 +222,9 @@
                                     </div>
                                 @endif
                             </div>
+                            @if ($canContactStore)
+                                <div id="store-contact-mobile-slot" class="mb-4"></div>
+                            @endif
                             <div class="ps-shopping__header">
                                 <p>
                                     <strong>{{ $products->total() }}</strong>

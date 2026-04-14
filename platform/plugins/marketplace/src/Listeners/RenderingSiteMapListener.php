@@ -18,8 +18,9 @@ class RenderingSiteMapListener
                     $stores = Store::query()
                         ->with('slugable')
                         ->where('status', BaseStatusEnum::PUBLISHED)
+                        ->orderByDesc('priority')
                         ->orderByDesc('created_at')
-                        ->select(['id', 'name', 'updated_at'])
+                        ->select(['id', 'name', 'priority', 'updated_at'])
                         ->get();
 
                     foreach ($stores as $store) {

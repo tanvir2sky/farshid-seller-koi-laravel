@@ -49,10 +49,12 @@ class Store extends BaseModel
         'certificate_file',
         'government_id_file',
         'tax_id',
+        'priority',
     ];
 
     protected $casts = [
         'status' => StoreStatusEnum::class,
+        'priority' => 'int',
         'name' => SafeContent::class,
         'description' => SafeContent::class,
         'content' => SafeContent::class,
