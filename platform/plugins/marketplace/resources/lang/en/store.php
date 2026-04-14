@@ -26,6 +26,8 @@ return [
         'is_vendor' => 'Is vendor?',
         'priority' => 'Priority',
         'priority_helper' => 'Higher numbers appear first on the public stores listing.',
+        'gallery' => 'Store gallery',
+        'gallery_helper' => 'Upload one or more JPG, PNG, or WebP images. They will appear on the store page gallery.',
         'company' => 'Company',
         'company_placeholder' => 'Company',
         'zip_code' => 'Zip Code',

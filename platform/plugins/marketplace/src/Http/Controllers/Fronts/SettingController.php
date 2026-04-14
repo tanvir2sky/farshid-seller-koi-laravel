@@ -83,7 +83,7 @@ class SettingController extends BaseController
                 }
             }
 
-            $store->fill(collect($request->input())->except(['priority'])->all());
+            $store->fill(collect($request->input())->except(['priority', 'gallery'])->all());
             $store->save();
 
             $request->merge(['is_slug_editable' => 1]);

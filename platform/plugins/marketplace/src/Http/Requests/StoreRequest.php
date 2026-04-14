@@ -58,6 +58,8 @@ class StoreRequest extends Request
             'logo' => ['nullable', 'string', new MediaImageRule()],
             'logo_square' => ['nullable', 'string', new MediaImageRule()],
             'cover_image' => ['nullable', 'string', new MediaImageRule()],
+            'gallery' => ['nullable', 'array'],
+            'gallery.*' => ['nullable', 'string', new MediaImageRule()],
             'category_ids' => ['nullable', 'array'],
             'category_ids.*' => ['integer', 'exists:mp_store_categories,id'],
         ];

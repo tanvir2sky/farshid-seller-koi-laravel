@@ -68,6 +68,80 @@
                 display: none !important;
             }
         }
+
+        .store-gallery-section {
+            margin: 0 0 32px;
+            padding: 24px;
+            border-radius: 10px;
+            background: #f5f5f5;
+        }
+
+        .store-gallery-section__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .store-gallery-section__header h4 {
+            margin-bottom: 0;
+            font-size: 22px;
+        }
+
+        .store-gallery-section__count {
+            color: #666;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .store-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .store-gallery-card {
+            display: block;
+            overflow: hidden;
+            border-radius: 8px;
+            background: #e9e9e9;
+        }
+
+        .store-gallery-card img {
+            display: block;
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            transition: transform 0.25s ease;
+        }
+
+        .store-gallery-card:hover img {
+            transform: scale(1.03);
+        }
+
+        @media (max-width: 991px) {
+            .store-gallery-section {
+                padding: 16px;
+            }
+
+            .store-gallery-grid {
+                display: flex;
+                gap: 10px;
+                overflow-x: auto;
+                padding-bottom: 6px;
+                scroll-snap-type: x proximity;
+            }
+
+            .store-gallery-card {
+                flex: 0 0 160px;
+                scroll-snap-align: start;
+            }
+
+            .store-gallery-card img {
+                height: 160px;
+            }
+        }
     </style>
 
     <section class="ps-store-list">
@@ -175,6 +249,35 @@
                 $useStoreSidebar = $canContactStore || $hasCategoryFilter;
                 $storeContactBreakpoint = 992;
             @endphp
+
+            @php
+                $storeGalleryImages = array_values(array_filter((array) $store->gallery));
+            @endphp
+
+            @if ($storeGalleryImages)
+                <div class="store-gallery-section">
+                    <div class="store-gallery-section__header">
+                        <h4>{{ __('Store gallery') }}</h4>
+                        <span class="store-gallery-section__count">{{ trans_choice(':count image|:count images', count($storeGalleryImages), ['count' => count($storeGalleryImages)]) }}</span>
+                    </div>
+
+                    <div class="ps-gallery--image store-gallery-grid">
+                        @foreach ($storeGalleryImages as $galleryImage)
+                            <a
+                                href="{{ RvMedia::getImageUrl($galleryImage) }}"
+                                class="ps-gallery__item store-gallery-card"
+                            >
+                                <img
+                                    src="{{ RvMedia::getImageUrl($galleryImage, 'thumb') }}"
+                                    alt="{{ $store->name }}"
+                                    loading="lazy"
+                                >
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             <div class="ps-section__wrapper">
                 @if ($useStoreSidebar)
                     <div class="ps-layout--shop">

@@ -41,6 +41,7 @@ class Store extends BaseModel
         'logo',
         'logo_square',
         'cover_image',
+        'gallery',
         'description',
         'content',
         'status',
@@ -55,6 +56,7 @@ class Store extends BaseModel
     protected $casts = [
         'status' => StoreStatusEnum::class,
         'priority' => 'int',
+        'gallery' => 'array',
         'name' => SafeContent::class,
         'description' => SafeContent::class,
         'content' => SafeContent::class,

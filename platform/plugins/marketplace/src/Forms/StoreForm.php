@@ -17,6 +17,7 @@ use Botble\Base\Forms\Fields\EditorField;
 use Botble\Base\Forms\Fields\EmailField;
 use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\MediaImageField;
+use Botble\Base\Forms\Fields\MediaImagesField;
 use Botble\Base\Forms\Fields\MultiCheckListField;
 use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\SelectField;
@@ -107,6 +108,16 @@ class StoreForm extends FormAbstract
                     ->label(__('Cover Image'))
                     ->colspan(2)
             )
+            ->when(! $this instanceof VendorStoreForm, function (StoreForm $form): void {
+                $form->add('gallery[]', MediaImagesField::class, [
+                    'label' => trans('plugins/marketplace::store.forms.gallery'),
+                    'values' => $this->getModel()->gallery ?: [],
+                    'help_block' => [
+                        'text' => trans('plugins/marketplace::store.forms.gallery_helper'),
+                    ],
+                    'colspan' => 6,
+                ]);
+            })
             ->add('status', SelectField::class, [
                 'label' => trans('core/base::tables.status'),
                 'required' => true,
