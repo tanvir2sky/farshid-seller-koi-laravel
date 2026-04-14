@@ -26,6 +26,10 @@
                         } else {
                             Theme.showSuccess(response.message);
 
+                            document.dispatchEvent(new CustomEvent('bb.contact-store.sent', {
+                                detail: response,
+                            }));
+
                             if (response.data && response.data.next_url) {
                                 window.setTimeout(function () {
                                     window.location.href = response.data.next_url;

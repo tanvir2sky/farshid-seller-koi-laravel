@@ -8,6 +8,66 @@
             border: none !important;
             box-shadow: none !important;
         }
+
+        .store-contact-mobile-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: none;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.55);
+        }
+
+        .store-contact-mobile-modal.is-active {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .store-contact-mobile-modal__dialog {
+            position: relative;
+            width: 100%;
+            max-width: 560px;
+            max-height: calc(100vh - 32px);
+            overflow: auto;
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .store-contact-mobile-modal__close {
+            position: sticky;
+            top: 12px;
+            z-index: 2;
+            display: block;
+            margin: 12px 12px 0 auto;
+            width: 40px;
+            height: 40px;
+            border: 0;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.08);
+            color: #111;
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        .store-contact-mobile-modal__body {
+            padding: 0 16px 16px;
+        }
+
+        .store-contact-mobile-modal__body .store-contact-form {
+            margin-bottom: 0 !important;
+        }
+
+        .store-contact-modal-open {
+            overflow: hidden;
+        }
+
+        @media (min-width: 992px) {
+            .store-contact-mobile-modal {
+                display: none !important;
+            }
+        }
     </style>
 
     <section class="ps-store-list">
@@ -176,18 +236,82 @@
                                         var contactSection = document.getElementById('store-contact-section');
                                         var desktopSlot = document.getElementById('store-contact-sidebar-slot');
                                         var mobileSlot = document.getElementById('store-contact-mobile-slot');
+                                        var mobileModal = document.getElementById('store-contact-mobile-modal');
+                                        var openButtons = document.querySelectorAll('[data-store-contact-open]');
+                                        var closeButtons = document.querySelectorAll('[data-store-contact-close]');
 
                                         if (!contactSection || !desktopSlot || !mobileSlot) {
                                             return;
                                         }
 
+                                        var isMobileViewport = function () {
+                                            return window.innerWidth < {{ $storeContactBreakpoint }};
+                                        };
+
+                                        var closeStoreContactModal = function () {
+                                            if (!mobileModal) {
+                                                return;
+                                            }
+
+                                            mobileModal.classList.remove('is-active');
+                                            mobileModal.setAttribute('aria-hidden', 'true');
+                                            document.body.classList.remove('store-contact-modal-open');
+                                        };
+
+                                        var openStoreContactModal = function () {
+                                            if (!mobileModal || !isMobileViewport()) {
+                                                return;
+                                            }
+
+                                            mobileModal.classList.add('is-active');
+                                            mobileModal.setAttribute('aria-hidden', 'false');
+                                            document.body.classList.add('store-contact-modal-open');
+                                        };
+
                                         var syncStoreContactSection = function () {
-                                            var targetSlot = window.innerWidth < {{ $storeContactBreakpoint }} ? mobileSlot : desktopSlot;
+                                            var targetSlot = isMobileViewport() ? mobileSlot : desktopSlot;
 
                                             if (contactSection.parentElement !== targetSlot) {
                                                 targetSlot.appendChild(contactSection);
                                             }
+
+                                            if (!isMobileViewport()) {
+                                                closeStoreContactModal();
+                                            }
                                         };
+
+                                        openButtons.forEach(function (button) {
+                                            button.addEventListener('click', function (event) {
+                                                event.preventDefault();
+                                                openStoreContactModal();
+                                            });
+                                        });
+
+                                        closeButtons.forEach(function (button) {
+                                            button.addEventListener('click', function () {
+                                                closeStoreContactModal();
+                                            });
+                                        });
+
+                                        if (mobileModal) {
+                                            mobileModal.addEventListener('click', function (event) {
+                                                if (event.target === mobileModal) {
+                                                    closeStoreContactModal();
+                                                }
+                                            });
+                                        }
+
+                                        document.addEventListener('keydown', function (event) {
+                                            if (event.key === 'Escape') {
+                                                closeStoreContactModal();
+                                            }
+                                        });
+
+                                        document.addEventListener('bb.contact-store.sent', function () {
+                                            if (isMobileViewport()) {
+                                                closeStoreContactModal();
+                                            }
+                                        });
 
                                         syncStoreContactSection();
                                         window.addEventListener('resize', syncStoreContactSection);
@@ -223,7 +347,39 @@
                                 @endif
                             </div>
                             @if ($canContactStore)
-                                <div id="store-contact-mobile-slot" class="mb-4"></div>
+                                <div class="mb-4 d-lg-none">
+                                    <button
+                                        type="button"
+                                        class="ps-btn ps-btn--fullwidth"
+                                        data-store-contact-open
+                                    >
+                                        {{ __('Contact seller') }}
+                                    </button>
+                                </div>
+
+                                <div
+                                    id="store-contact-mobile-modal"
+                                    class="store-contact-mobile-modal"
+                                    aria-hidden="true"
+                                >
+                                    <div
+                                        class="store-contact-mobile-modal__dialog"
+                                        role="dialog"
+                                        aria-modal="true"
+                                        aria-label="{{ __('Contact seller') }}"
+                                    >
+                                        <button
+                                            type="button"
+                                            class="store-contact-mobile-modal__close"
+                                            aria-label="{{ __('Close') }}"
+                                            data-store-contact-close
+                                        >
+                                            &times;
+                                        </button>
+
+                                        <div id="store-contact-mobile-slot" class="store-contact-mobile-modal__body"></div>
+                                    </div>
+                                </div>
                             @endif
                             <div class="ps-shopping__header">
                                 <p>
