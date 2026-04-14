@@ -1,4 +1,15 @@
 <div class="ps-page--single ps-page--vendor">
+    <style>
+        .ps-block--store-banner .ps-block__user-social li,
+        .ps-block--store-banner .ps-block__user-social li a,
+        .ps-block--store-banner .ps-block__user-social li:hover,
+        .ps-block--store-banner .ps-block__user-social li a:hover {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+    </style>
+
     <section class="ps-store-list">
         <div class="container">
             @php $coverImage = $store->getMetaData('cover_image', true); @endphp
@@ -41,7 +52,7 @@
                                 @if (!empty($social_links['facebook']))
                                     <li>
                                         <a href="https://facebook.com/{{ ltrim($social_links['facebook'], '/') }}" target="_blank" title="Facebook">
-                                            <svg class="icon svg-icon-ti-ti-brand-facebook" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v4h3v7h4v-7h3l1 -4h-4v-2a1 1 0 0 1 1 -1h3v-4h-3a5 5 0 0 0 -5 5v2h-3"></path></svg>
+                                            <img src="{{ asset('themes/martfury/img/facebook.svg') }}" alt="Facebook">
                                         </a>
                                     </li>
                                 @endif
@@ -55,7 +66,7 @@
                                 @if (!empty($social_links['whatsapp']))
                                     <li>
                                         <a href="{{ $social_links['whatsapp'] }}" target="_blank" title="Whatsapp">
-                                            <svg class="icon svg-icon-ti-ti-brand-whatsapp" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"></path><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"></path></svg>
+                                            <img src="{{ asset('themes/martfury/img/whatsapp.svg') }}" alt="Whatsapp">
                                         </a>
                                     </li>
                                 @endif
