@@ -110,6 +110,32 @@
         };
     </script>
 
+    <div class="pwa-install-prompt" id="pwa-install-prompt" aria-hidden="true">
+        <div class="pwa-install-prompt__card">
+            <div class="pwa-install-prompt__content">
+                <img
+                    class="pwa-install-prompt__icon"
+                    src="{{ asset('pwa/icons/icon-192.png') }}"
+                    alt="{{ theme_option('site_title') ?: config('app.name', 'Seller Koi') }}"
+                >
+                <div>
+                    <h2 class="pwa-install-prompt__title">{{ __('Add to Home Screen') }}</h2>
+                    <p class="pwa-install-prompt__description">
+                        {{ __('Install :appName for a faster, full-screen shopping experience on your Android device.', ['appName' => theme_option('site_title') ?: config('app.name', 'Seller Koi')]) }}
+                    </p>
+                </div>
+            </div>
+            <div class="pwa-install-prompt__actions">
+                <button class="pwa-install-prompt__button pwa-install-prompt__button--ghost" type="button" id="pwa-install-dismiss">
+                    {{ __('Not now') }}
+                </button>
+                <button class="pwa-install-prompt__button pwa-install-prompt__button--primary" type="button" id="pwa-install-button">
+                    {{ __('Install') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
     {!! Theme::footer() !!}
 
     <script>
@@ -120,6 +146,89 @@
                 });
             });
         }
+    </script>
+
+    <script>
+        (function () {
+            var promptKey = 'seller-koi-pwa-install-dismissed-at';
+            var dismissCooldown = 7 * 24 * 60 * 60 * 1000;
+            var deferredPrompt = null;
+            var promptElement = document.getElementById('pwa-install-prompt');
+            var installButton = document.getElementById('pwa-install-button');
+            var dismissButton = document.getElementById('pwa-install-dismiss');
+
+            if (!promptElement || !installButton || !dismissButton) {
+                return;
+            }
+
+            function isAndroid() {
+                return /android/i.test(window.navigator.userAgent || '');
+            }
+
+            function isStandalone() {
+                return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            }
+
+            function wasDismissedRecently() {
+                var dismissedAt = Number(window.localStorage.getItem(promptKey) || 0);
+
+                return dismissedAt && (Date.now() - dismissedAt) < dismissCooldown;
+            }
+
+            function showPrompt() {
+                if (!isAndroid() || isStandalone() || wasDismissedRecently() || !deferredPrompt) {
+                    return;
+                }
+
+                promptElement.classList.add('is-visible');
+                promptElement.setAttribute('aria-hidden', 'false');
+            }
+
+            function hidePrompt(persistDismissal) {
+                promptElement.classList.remove('is-visible');
+                promptElement.setAttribute('aria-hidden', 'true');
+
+                if (persistDismissal) {
+                    window.localStorage.setItem(promptKey, String(Date.now()));
+                }
+            }
+
+            window.addEventListener('beforeinstallprompt', function (event) {
+                event.preventDefault();
+                deferredPrompt = event;
+
+                window.setTimeout(showPrompt, 2500);
+            });
+
+            window.addEventListener('appinstalled', function () {
+                deferredPrompt = null;
+                hidePrompt(false);
+                window.localStorage.removeItem(promptKey);
+            });
+
+            dismissButton.addEventListener('click', function () {
+                hidePrompt(true);
+            });
+
+            installButton.addEventListener('click', async function () {
+                if (!deferredPrompt) {
+                    hidePrompt(true);
+                    return;
+                }
+
+                deferredPrompt.prompt();
+
+                var choiceResult = await deferredPrompt.userChoice;
+
+                if (choiceResult && choiceResult.outcome !== 'accepted') {
+                    hidePrompt(true);
+                } else {
+                    hidePrompt(false);
+                }
+
+                deferredPrompt = null;
+            });
+        })();
     </script>
 
     </body>
