@@ -112,5 +112,15 @@
 
     {!! Theme::footer() !!}
 
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register(@json(route('pwa.sw')), { scope: '/' }).catch(function (error) {
+                    console.warn('PWA service worker registration failed.', error);
+                });
+            });
+        }
+    </script>
+
     </body>
 </html>
