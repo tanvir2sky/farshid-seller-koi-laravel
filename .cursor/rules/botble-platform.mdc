@@ -1,0 +1,32 @@
+---
+description: Botble CMS + Martfury — where code lives and how to work in this repo
+alwaysApply: true
+---
+
+# Project: Botble CMS (Laravel) + Martfury theme
+
+- Stack: **Laravel 11**, **PHP 8.2+**, **Botble CMS** (`botble/*` in Composer). Active storefront theme is **Martfury**.
+- **Most product logic, plugins, packages, and theme code lives under `platform/`**, not only the root Laravel `app/` tree.
+
+## Directory map
+
+| Area | Path |
+|------|------|
+| Botble core | `platform/core/` |
+| First-party style packages | `platform/packages/` |
+| Plugins (e-commerce, language, etc.) | `platform/plugins/` |
+| Themes (**Martfury** storefront/admin views, assets, widgets) | `platform/themes/martfury/` |
+| Shell Laravel app (minimal vs platform) | Root: `app/`, `bootstrap/`, `config/`, `routes/`, `database/` |
+
+Composer merges plugin/theme manifests from `platform/plugins/*/composer.json` and `platform/themes/*/composer.json` (see root `composer.json` `extra.merge-plugin`).
+
+## Agent behavior
+
+1. For **theme UI, Blade, SCSS/JS, theme routes, shortcodes, Martfury widgets** → start in `platform/themes/martfury/`.
+2. For **e-commerce, CMS features, admin plugins** → search `platform/plugins/` (e.g. `ecommerce`) and `platform/core/`.
+3. For **App boot, middleware, global Laravel config** → root `app/`, `config/`, `routes/` as needed.
+4. Prefer **existing Botble patterns** (providers, `Plugin.php`, theme `functions.php`, hooks, Botble helpers) over inventing parallel structures under root `app/`.
+
+## References
+
+- Longer onboarding copy for humans and other tools: **`AGENTS.md`** and **`CLAUDE.md`** at repo root (same intent).

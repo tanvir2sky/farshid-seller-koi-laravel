@@ -146,6 +146,11 @@ class Store extends BaseModel
             ->join('ec_reviews', 'ec_products.id', '=', 'ec_reviews.product_id');
     }
 
+    public function followers(): HasMany
+    {
+        return $this->hasMany(StoreFollower::class, 'store_id');
+    }
+
     protected function uploadFolder(): Attribute
     {
         return Attribute::make(

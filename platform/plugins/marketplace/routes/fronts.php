@@ -10,6 +10,7 @@ use Botble\Marketplace\Http\Controllers\Fronts\BecomeVendorController;
 use Botble\Marketplace\Http\Controllers\Fronts\ContactStoreController;
 use Botble\Marketplace\Http\Controllers\Fronts\CustomerMessageController;
 use Botble\Marketplace\Http\Controllers\Fronts\ExportProductController;
+use Botble\Marketplace\Http\Controllers\Fronts\FeedController;
 use Botble\Marketplace\Http\Controllers\Fronts\ImportProductController;
 use Botble\Marketplace\Http\Controllers\Fronts\MessageController;
 use Botble\Marketplace\Http\Controllers\Fronts\PublicStoreController;
@@ -55,6 +56,17 @@ Route::group([
             Route::post('{store}/archive', [CustomerMessageController::class, 'archive'])->name('archive')->wherePrimaryKey('store');
             Route::post('{store}/unarchive', [CustomerMessageController::class, 'unarchive'])->name('unarchive')->wherePrimaryKey('store');
             Route::get('{store}/refresh', [CustomerMessageController::class, 'refresh'])->name('refresh')->wherePrimaryKey('store');
+        });
+
+        Route::middleware('customer')->get('feed', [FeedController::class, 'index'])->name('public.feed');
+
+        Route::middleware('customer')->prefix('feed')->name('public.feed.')->group(function (): void {
+            Route::get('followed-stores', [FeedController::class, 'followedStores'])->name('followed-stores');
+            Route::get('items', [FeedController::class, 'loadMore'])->name('items');
+            Route::post('comments', [FeedController::class, 'comment'])->name('comments');
+            Route::post('follow/{store}', [FeedController::class, 'follow'])->name('follow')->wherePrimaryKey('store');
+            Route::delete('follow/{store}', [FeedController::class, 'unfollow'])->name('unfollow')->wherePrimaryKey('store');
+            Route::post('products', [FeedController::class, 'storeProduct'])->name('products.store');
         });
     });
 });
