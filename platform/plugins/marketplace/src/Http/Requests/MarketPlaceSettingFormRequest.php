@@ -4,6 +4,7 @@ namespace Botble\Marketplace\Http\Requests;
 
 use Botble\Base\Rules\OnOffRule;
 use Botble\Ecommerce\Http\Requests\ProductRequest as BaseProductRequest;
+use Botble\Marketplace\Enums\FeedAlgorithmEnum;
 use Botble\Marketplace\Enums\PayoutPaymentMethodsEnum;
 use Botble\Media\Facades\RvMedia;
 use Illuminate\Validation\Rule;
@@ -49,6 +50,13 @@ class MarketPlaceSettingFormRequest extends BaseProductRequest
             'display_order_total_info_for_each_store' => [new OnOffRule()],
             'media_mime_types_allowed' => ['nullable', 'array'],
             'media_mime_types_allowed.*' => ['nullable', 'string', Rule::in(explode(',', RvMedia::getConfig('allowed_mime_types')))],
+            'feed_algorithm' => ['nullable', 'string', Rule::in(array_values(FeedAlgorithmEnum::toArray()))],
+            'feed_vendor_pin_product_limit' => ['nullable', 'integer', 'min:1', 'max:20'],
+            'feed_card_radius_px' => ['nullable', 'integer', 'min:0', 'max:48'],
+            'feed_accent_color' => ['nullable', 'string', 'max:64'],
+            'feed_density' => ['nullable', 'string', Rule::in(['normal', 'compact'])],
+            'feed_show_like_counts' => [new OnOffRule()],
+            'feed_show_comment_counts' => [new OnOffRule()],
         ];
 
         if ($this->input('enable_commission_fee_for_each_category')) {

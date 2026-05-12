@@ -50,6 +50,8 @@ class Plugin extends PluginOperationAbstract
             }
         });
 
+        Schema::dropIfExists('mp_feed_pins');
+
         Schema::dropIfExists('mp_stores');
 
         Setting::delete([
@@ -63,6 +65,13 @@ class Plugin extends PluginOperationAbstract
             'marketplace_fee_per_order',
             'marketplace_fee_withdrawal',
             'marketplace_payout_methods',
+            'marketplace_feed_algorithm',
+            'marketplace_feed_vendor_pin_product_limit',
+            'marketplace_feed_card_radius_px',
+            'marketplace_feed_accent_color',
+            'marketplace_feed_density',
+            'marketplace_feed_show_like_counts',
+            'marketplace_feed_show_comment_counts',
         ]);
     }
 }

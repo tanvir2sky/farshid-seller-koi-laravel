@@ -19,3 +19,7 @@ if (! defined('REVENUE_MODULE_SCREEN_NAME')) {
 if (! defined('WITHDRAWAL_MODULE_SCREEN_NAME')) {
     define('WITHDRAWAL_MODULE_SCREEN_NAME', 'withdrawal');
 }
+
+if (! defined('FEED_PIN_MODULE_SCREEN_NAME')) {
+    define('FEED_PIN_MODULE_SCREEN_NAME', 'feed-pin');
+}

@@ -157,6 +157,15 @@ class MarketplaceServiceProvider extends ServiceProvider
                     'permissions' => ['marketplace.messages.index'],
                 ])
                 ->registerItem([
+                    'id' => 'cms-plugins-marketplace-feed-pins',
+                    'priority' => 8,
+                    'parent_id' => 'cms-plugins-marketplace',
+                    'name' => 'plugins/marketplace::feed-pin.name',
+                    'icon' => null,
+                    'url' => fn () => route('marketplace.feed-pins.index'),
+                    'permissions' => ['marketplace.feed-pins.index'],
+                ])
+                ->registerItem([
                     'id' => 'cms-plugins-marketplace-vendors',
                     'priority' => 5,
                     'parent_id' => 'cms-plugins-marketplace',

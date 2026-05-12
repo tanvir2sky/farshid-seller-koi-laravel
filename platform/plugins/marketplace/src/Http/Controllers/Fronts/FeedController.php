@@ -21,17 +21,16 @@ use Botble\Marketplace\Models\StoreFollower;
 use Botble\Marketplace\Services\FeedQueryService;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 
 class FeedController extends BaseController
 {
-    public function index(Request $request, FeedQueryService $feedQueryService)
+    public function index(FeedQueryService $feedQueryService)
     {
         $customer = auth('customer')->user();
-        $products = $feedQueryService->getProducts($customer);
+        $result = $feedQueryService->getFeedPage($customer, 1, 8, true);
+        $products = $result->toPaginator();
         $feedData = $this->buildFeedData($products, $customer->id, $feedQueryService);
 
         SeoHelper::setTitle(__('Feed'));
@@ -76,7 +75,9 @@ class FeedController extends BaseController
     public function loadMore(Request $request, FeedQueryService $feedQueryService): JsonResponse
     {
         $customer = auth('customer')->user();
-        $products = $feedQueryService->getProducts($customer);
+        $page = max(2, $request->integer('page', 2));
+        $result = $feedQueryService->getFeedPage($customer, $page, 8, false);
+        $products = $result->toPaginator();
         $feedData = $this->buildFeedData($products, $customer->id, $feedQueryService);
 
         $html = Theme::partial('feed-items', [
@@ -225,6 +226,9 @@ class FeedController extends BaseController
             ->groupBy('product_id')
             ->pluck('total', 'product_id');
 
-        return compact('likedProductIds', 'likeCounts', 'followedStores', 'comments', 'commentCounts');
+        return array_merge(
+            compact('likedProductIds', 'likeCounts', 'followedStores', 'comments', 'commentCounts'),
+            ['feedDesign' => MarketplaceHelper::getFeedDesignSettings()]
+        );
     }
 }

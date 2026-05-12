@@ -4,6 +4,9 @@
         $liked = isset($likedProductIds[$product->id]);
         $followed = $store && isset($followedStores[$store->id]);
         $productComments = $comments->get($product->id, collect());
+        $feedDesign = $feedDesign ?? \Botble\Marketplace\Facades\MarketplaceHelper::getFeedDesignSettings();
+        $showLikeCounts = $feedDesign['show_like_counts'] ?? true;
+        $showCommentCounts = $feedDesign['show_comment_counts'] ?? true;
     @endphp
     <article class="feed-card mb-4">
         <div class="d-flex justify-content-between align-items-start">
@@ -43,7 +46,7 @@
                     alt="{{ $product->name }}"
                     loading="lazy"
                     class="w-100"
-                    style="border-radius: 8px; max-height: 420px; object-fit: contain;"
+                    style="border-radius: var(--feed-card-radius, 8px); max-height: 420px; object-fit: contain;"
                 >
             </a>
         </div>
@@ -55,9 +58,11 @@
                 data-liked="{{ $liked ? '1' : '0' }}"
                 data-url="{{ route('public.wishlist.add', $product->id) }}"
             >
-                {{ __('Like') }} (<span data-like-count>{{ (int) ($likeCounts[$product->id] ?? 0) }}</span>)
+                {{ __('Like') }}@if($showLikeCounts) (<span data-like-count>{{ (int) ($likeCounts[$product->id] ?? 0) }}</span>)@endif
             </button>
-            <span class="feed-meta">{{ __('Comments') }}: <span data-comment-count>{{ (int) ($commentCounts[$product->id] ?? 0) }}</span></span>
+            @if($showCommentCounts)
+                <span class="feed-meta">{{ __('Comments') }}: <span data-comment-count>{{ (int) ($commentCounts[$product->id] ?? 0) }}</span></span>
+            @endif
         </div>
 
         <div class="feed-comments">

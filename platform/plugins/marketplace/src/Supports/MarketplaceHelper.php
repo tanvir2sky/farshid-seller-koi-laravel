@@ -7,6 +7,7 @@ use Botble\Base\Supports\EmailHandler as BaseEmailHandler;
 use Botble\Ecommerce\Enums\DiscountTypeOptionEnum;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Models\Order as OrderModel;
+use Botble\Marketplace\Enums\FeedAlgorithmEnum;
 use Botble\Media\Facades\RvMedia;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Collection;
@@ -245,5 +246,30 @@ class MarketplaceHelper
         }
 
         return $allowedMimeTypes;
+    }
+
+    public function getFeedAlgorithm(): string
+    {
+        $algorithm = (string) $this->getSetting('feed_algorithm', FeedAlgorithmEnum::FOLLOW_BIASED_RANDOM);
+
+        return FeedAlgorithmEnum::isValid($algorithm)
+            ? $algorithm
+            : FeedAlgorithmEnum::FOLLOW_BIASED_RANDOM;
+    }
+
+    /**
+     * @return array{card_radius_px: int, accent_color: string, density: string, show_like_counts: bool, show_comment_counts: bool}
+     */
+    public function getFeedDesignSettings(): array
+    {
+        return [
+            'card_radius_px' => (int) $this->getSetting('feed_card_radius_px', 8),
+            'accent_color' => (string) $this->getSetting('feed_accent_color', '#1877f2'),
+            'density' => in_array((string) $this->getSetting('feed_density', 'normal'), ['compact', 'normal'], true)
+                ? (string) $this->getSetting('feed_density', 'normal')
+                : 'normal',
+            'show_like_counts' => filter_var($this->getSetting('feed_show_like_counts', true), FILTER_VALIDATE_BOOLEAN),
+            'show_comment_counts' => filter_var($this->getSetting('feed_show_comment_counts', true), FILTER_VALIDATE_BOOLEAN),
+        ];
     }
 }

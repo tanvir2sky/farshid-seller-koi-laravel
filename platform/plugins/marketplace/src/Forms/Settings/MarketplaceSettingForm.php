@@ -6,10 +6,13 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FieldOptions\CheckboxFieldOption;
 use Botble\Base\Forms\FieldOptions\MultiChecklistFieldOption;
 use Botble\Base\Forms\FieldOptions\NumberFieldOption;
+use Botble\Base\Forms\FieldOptions\SelectFieldOption;
+use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\Fields\MultiCheckListField;
 use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\OnOffCheckboxField;
+use Botble\Marketplace\Enums\FeedAlgorithmEnum;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Requests\MarketPlaceSettingFormRequest;
 use Botble\Marketplace\Models\Store;
@@ -228,6 +231,60 @@ class MarketplaceSettingForm extends SettingForm
                     ->label(trans('plugins/marketplace::marketplace.settings.display_order_total_info_for_each_store'))
                     ->value(MarketplaceHelper::getSetting('display_order_total_info_for_each_store', false))
                     ->helperText(trans('plugins/marketplace::marketplace.settings.display_order_total_info_for_each_store_helper'))
-            );
+            )
+            ->addOpenFieldset('feed_settings', [])
+            ->add(
+                'feed_algorithm',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(trans('plugins/marketplace::feed-pin.settings.algorithm'))
+                    ->choices(FeedAlgorithmEnum::labels())
+                    ->selected(MarketplaceHelper::getFeedAlgorithm())
+            )
+            ->add(
+                'feed_vendor_pin_product_limit',
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(trans('plugins/marketplace::feed-pin.settings.vendor_pin_limit'))
+                    ->helperText(trans('plugins/marketplace::feed-pin.settings.vendor_pin_limit_help'))
+                    ->value((int) MarketplaceHelper::getSetting('feed_vendor_pin_product_limit', 3))
+            )
+            ->add(
+                'feed_card_radius_px',
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(trans('plugins/marketplace::feed-pin.settings.card_radius'))
+                    ->value((int) MarketplaceHelper::getSetting('feed_card_radius_px', 8))
+            )
+            ->add('feed_accent_color', 'text', [
+                'label' => trans('plugins/marketplace::feed-pin.settings.accent_color'),
+                'value' => (string) MarketplaceHelper::getSetting('feed_accent_color', '#1877f2'),
+            ])
+            ->add(
+                'feed_density',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(trans('plugins/marketplace::feed-pin.settings.density'))
+                    ->choices([
+                        'normal' => trans('plugins/marketplace::feed-pin.settings.density_normal'),
+                        'compact' => trans('plugins/marketplace::feed-pin.settings.density_compact'),
+                    ])
+                    ->selected((string) MarketplaceHelper::getSetting('feed_density', 'normal'))
+            )
+            ->add(
+                'feed_show_like_counts',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/marketplace::feed-pin.settings.show_like_counts'))
+                    ->value((bool) MarketplaceHelper::getSetting('feed_show_like_counts', true))
+            )
+            ->add(
+                'feed_show_comment_counts',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/marketplace::feed-pin.settings.show_comment_counts'))
+                    ->value((bool) MarketplaceHelper::getSetting('feed_show_comment_counts', true))
+            )
+            ->addCloseFieldset('feed_settings');
     }
 }

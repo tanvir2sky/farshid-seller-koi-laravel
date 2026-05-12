@@ -1,8 +1,9 @@
 @php
     Theme::layout('default');
+    $feedDesign = $feedDesign ?? \Botble\Marketplace\Facades\MarketplaceHelper::getFeedDesignSettings();
 @endphp
 
-<section class="ps-page--feed py-5">
+<section class="ps-page--feed py-5 feed-page feed-page--density-{{ $feedDesign['density'] ?? 'normal' }}" style="--feed-card-radius: {{ (int) ($feedDesign['card_radius_px'] ?? 8) }}px; --feed-accent: {{ e($feedDesign['accent_color'] ?? '#1877f2') }};">
     <div class="container">
         <div class="feed-wrapper">
             <div id="feed-flash-message" class="alert alert-success d-none mb-3" role="alert"></div>
@@ -54,7 +55,7 @@
             @endif
 
             <div id="feed-items" data-next-page="{{ $nextFeedItemsUrl }}">
-                {!! Theme::partial('feed-items', compact('products', 'likedProductIds', 'likeCounts', 'followedStores', 'comments', 'commentCounts')) !!}
+                {!! Theme::partial('feed-items', compact('products', 'likedProductIds', 'likeCounts', 'followedStores', 'comments', 'commentCounts', 'feedDesign')) !!}
             </div>
             <div id="feed-loader" class="text-center py-3 d-none">{{ __('Loading...') }}</div>
         </div>
@@ -63,14 +64,16 @@
 
 <style>
     .feed-wrapper { max-width: 760px; margin: 0 auto; }
-    .feed-card { background: #fff; border: 1px solid #e6e6e6; border-radius: 8px; padding: 16px; }
+    .feed-card { background: #fff; border: 1px solid #e6e6e6; border-radius: var(--feed-card-radius, 8px); padding: 16px; }
+    .feed-page--density-compact .feed-card { padding: 12px; }
+    .feed-page--density-compact .feed-card.mb-4 { margin-bottom: 12px !important; }
     .feed-meta { font-size: 13px; color: #666; }
     .feed-actions { display: flex; gap: 16px; margin: 10px 0; }
     .feed-action-btn { border: 0; background: transparent; padding: 0; color: #333; font-weight: 500; }
-    .feed-action-btn.is-active { color: #007bff; }
+    .feed-action-btn.is-active { color: var(--feed-accent, #007bff); }
     .feed-follow-btn {
-        border: 1px solid #1877f2;
-        background: #1877f2;
+        border: 1px solid var(--feed-accent, #1877f2);
+        background: var(--feed-accent, #1877f2);
         color: #fff;
         border-radius: 999px;
         padding: 6px 14px;

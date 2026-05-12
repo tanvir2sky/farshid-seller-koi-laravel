@@ -126,4 +126,25 @@ return [
         'flag' => 'marketplace.settings',
         'parent_flag' => 'ecommerce.settings',
     ],
+
+    [
+        'name' => 'Feed pins',
+        'flag' => 'marketplace.feed-pins.index',
+        'parent_flag' => 'marketplace.index',
+    ],
+    [
+        'name' => 'Create',
+        'flag' => 'marketplace.feed-pins.create',
+        'parent_flag' => 'marketplace.feed-pins.index',
+    ],
+    [
+        'name' => 'Edit',
+        'flag' => 'marketplace.feed-pins.edit',
+        'parent_flag' => 'marketplace.feed-pins.index',
+    ],
+    [
+        'name' => 'Delete',
+        'flag' => 'marketplace.feed-pins.destroy',
+        'parent_flag' => 'marketplace.feed-pins.index',
+    ],
 ];

@@ -90,6 +90,11 @@ AdminHelper::registerRoutes(function (): void {
                 'permission' => 'marketplace.settings',
             ]);
 
+            Route::group(['prefix' => 'feed-pins', 'as' => 'feed-pins.'], function (): void {
+                Route::resource('', 'FeedPinController')
+                    ->parameters(['' => 'feed_pin']);
+            });
+
             Route::group(['prefix' => 'unverified-vendors', 'as' => 'unverified-vendors.'], function (): void {
                 Route::match(['GET', 'POST'], '/', [
                     'as' => 'index',
