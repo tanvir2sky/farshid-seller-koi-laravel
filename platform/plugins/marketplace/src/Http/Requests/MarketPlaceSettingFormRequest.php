@@ -57,6 +57,12 @@ class MarketPlaceSettingFormRequest extends BaseProductRequest
             'feed_density' => ['nullable', 'string', Rule::in(['normal', 'compact'])],
             'feed_show_like_counts' => [new OnOffRule()],
             'feed_show_comment_counts' => [new OnOffRule()],
+            'feed_allow_guest_product_post' => [new OnOffRule()],
+            'feed_guest_post_store_id' => ['nullable', 'integer', 'min:1'],
+            'feed_guest_post_rate_limit_per_hour' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'feed_guest_post_rate_limit_per_day' => ['nullable', 'integer', 'min:1', 'max:500'],
+            'feed_guest_post_customer_rate_limit_per_hour' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'feed_guest_post_customer_rate_limit_per_day' => ['nullable', 'integer', 'min:1', 'max:500'],
         ];
 
         if ($this->input('enable_commission_fee_for_each_category')) {

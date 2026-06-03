@@ -22,6 +22,7 @@
                     · {{ $product->created_at?->diffForHumans() }}
                 </div>
             </div>
+            @auth('customer')
             @if($store)
                 <button
                     class="feed-action-btn feed-follow-btn {{ $followed ? 'is-active' : '' }}"
@@ -37,6 +38,7 @@
                     {{ $followed ? __('Unfollow') : __('Follow') }}
                 </button>
             @endif
+            @endauth
         </div>
 
         <div class="mt-2">
@@ -52,14 +54,16 @@
         </div>
 
         <div class="feed-actions">
-            <button
-                class="feed-action-btn {{ $liked ? 'is-active' : '' }}"
-                data-feed-like
-                data-liked="{{ $liked ? '1' : '0' }}"
-                data-url="{{ route('public.wishlist.add', $product->id) }}"
-            >
-                {{ __('Like') }}@if($showLikeCounts) (<span data-like-count>{{ (int) ($likeCounts[$product->id] ?? 0) }}</span>)@endif
-            </button>
+            @auth('customer')
+                <button
+                    class="feed-action-btn {{ $liked ? 'is-active' : '' }}"
+                    data-feed-like
+                    data-liked="{{ $liked ? '1' : '0' }}"
+                    data-url="{{ route('public.wishlist.add', $product->id) }}"
+                >
+                    {{ __('Like') }}@if($showLikeCounts) (<span data-like-count>{{ (int) ($likeCounts[$product->id] ?? 0) }}</span>)@endif
+                </button>
+            @endauth
             @if($showCommentCounts)
                 <span class="feed-meta">{{ __('Comments') }}: <span data-comment-count>{{ (int) ($commentCounts[$product->id] ?? 0) }}</span></span>
             @endif
@@ -75,14 +79,21 @@
                 @endforeach
             </div>
 
-            <form action="{{ route('public.feed.comments') }}" method="POST" data-feed-comment-form>
-                @csrf
-                <input type="hidden" name="product_id" value="{{ $product->id }}">
-                <div class="d-flex align-items-center gap-2">
-                    <input class="form-control" name="content" placeholder="{{ __('Write a comment... (emoji supported)') }}" required maxlength="1000">
-                    <button class="ps-btn ps-btn--sm">{{ __('Post') }}</button>
-                </div>
-            </form>
+            @auth('customer')
+                <form action="{{ route('public.feed.comments') }}" method="POST" data-feed-comment-form>
+                    @csrf
+                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                    <div class="d-flex align-items-center gap-2">
+                        <input class="form-control" name="content" placeholder="{{ __('Write a comment... (emoji supported)') }}" required maxlength="1000">
+                        <button class="ps-btn ps-btn--sm">{{ __('Post') }}</button>
+                    </div>
+                </form>
+            @else
+                <p class="feed-meta mb-0">
+                    <a href="{{ route('customer.login') }}">{{ __('Login') }}</a>
+                    {{ __('to comment.') }}
+                </p>
+            @endauth
         </div>
     </article>
 @endforeach

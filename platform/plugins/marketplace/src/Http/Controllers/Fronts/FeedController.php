@@ -14,7 +14,10 @@ use Botble\Ecommerce\Services\StoreProductTagService;
 use Botble\Marketplace\Enums\StoreStatusEnum;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Requests\FeedCommentRequest;
+use Botble\Marketplace\Http\Requests\FeedGuestProductRequest;
 use Botble\Marketplace\Http\Requests\FeedProductRequest;
+use Botble\Marketplace\Services\FeedGuestProductService;
+use Botble\Marketplace\Services\FeedRecentPostsCookie;
 use Botble\Marketplace\Models\FeedComment;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Models\StoreFollower;
@@ -31,7 +34,7 @@ class FeedController extends BaseController
         $customer = auth('customer')->user();
         $result = $feedQueryService->getFeedPage($customer, 1, 8, true);
         $products = $result->toPaginator();
-        $feedData = $this->buildFeedData($products, $customer->id, $feedQueryService);
+        $feedData = $this->buildFeedData($products, $customer?->id, $feedQueryService);
 
         SeoHelper::setTitle(__('Feed'));
         Theme::breadcrumb()->add(__('Feed'), route('public.feed'));
@@ -47,6 +50,7 @@ class FeedController extends BaseController
                 'products' => $products,
                 'categories' => $categories,
                 'nextFeedItemsUrl' => $nextFeedItemsUrl,
+                'canGuestPost' => MarketplaceHelper::canCustomerPostToGuestFeedStore($customer),
                 ...$feedData,
             ]
         )->render();
@@ -78,7 +82,7 @@ class FeedController extends BaseController
         $page = max(2, $request->integer('page', 2));
         $result = $feedQueryService->getFeedPage($customer, $page, 8, false);
         $products = $result->toPaginator();
-        $feedData = $this->buildFeedData($products, $customer->id, $feedQueryService);
+        $feedData = $this->buildFeedData($products, $customer?->id, $feedQueryService);
 
         $html = Theme::partial('feed-items', [
             'products' => $products,
@@ -147,6 +151,45 @@ class FeedController extends BaseController
         return response()->json(['message' => __('Vendor unfollowed.')]);
     }
 
+    public function storeGuestProduct(
+        FeedGuestProductRequest $request,
+        FeedGuestProductService $feedGuestProductService
+    ): JsonResponse {
+        abort_unless(MarketplaceHelper::canCustomerPostToGuestFeedStore(), 403);
+
+        $customer = auth('customer')->user();
+        $product = $feedGuestProductService->createFromRequest($request, $customer);
+
+        $wantsVendor = $request->boolean('register_as_vendor')
+            && MarketplaceHelper::isVendorRegistrationEnabled();
+
+        $redirect = route('public.feed');
+
+        if ($wantsVendor) {
+            session([
+                'feed_vendor_registration' => [
+                    'name' => $request->input('vendor_register_name'),
+                    'email' => $request->input('vendor_register_email'),
+                ],
+                'url.intended' => route('marketplace.vendor.become-vendor'),
+            ]);
+
+            if ($customer) {
+                $redirect = route('marketplace.vendor.become-vendor');
+            } else {
+                $redirect = route('customer.register');
+            }
+        }
+
+        return response()
+            ->json([
+                'message' => __('Product posted successfully.'),
+                'redirect' => $redirect,
+                'product_id' => $product->getKey(),
+            ])
+            ->withCookie(FeedRecentPostsCookie::makeCookieForProduct($product->getKey(), $request));
+    }
+
     public function storeProduct(
         FeedProductRequest $request,
         StoreProductService $storeProductService,
@@ -156,9 +199,7 @@ class FeedController extends BaseController
         abort_unless($customer->is_vendor && $customer->store?->id, 403);
 
         $product = new Product();
-        $product->status = MarketplaceHelper::getSetting('enable_product_approval', 1)
-            ? BaseStatusEnum::PENDING
-            : BaseStatusEnum::PUBLISHED;
+        $product->status = BaseStatusEnum::PUBLISHED;
         $product->product_type = EcommerceHelper::getCurrentCreationContextProductType() === ProductTypeEnum::DIGITAL
             ? ProductTypeEnum::DIGITAL
             : ProductTypeEnum::PHYSICAL;
@@ -184,33 +225,46 @@ class FeedController extends BaseController
         $product->store_id = $customer->store->id;
         $product->created_by_id = $customer->getKey();
         $product->created_by_type = get_class($customer);
+        $product->stock_status = 'in_stock';
+        $product->status = BaseStatusEnum::PUBLISHED;
         $product->save();
 
         $storeProductTagService->execute($request, $product);
 
-        return response()->json([
-            'message' => __('Product created successfully.'),
-            'redirect' => route('public.feed'),
-        ]);
+        return response()
+            ->json([
+                'message' => __('Product created successfully.'),
+                'redirect' => route('public.feed'),
+                'product_id' => $product->getKey(),
+            ])
+            ->withCookie(FeedRecentPostsCookie::makeCookieForProduct($product->getKey(), $request));
     }
 
-    protected function buildFeedData($products, int $customerId, FeedQueryService $feedQueryService): array
+    protected function buildFeedData($products, ?int $customerId, FeedQueryService $feedQueryService): array
     {
         $productIds = $products->getCollection()->pluck('id');
         $storeIds = $products->getCollection()->pluck('store_id')->filter()->unique();
 
-        $likedProductIds = auth('customer')->user()->wishlist()
-            ->whereIn('product_id', $productIds->all())
-            ->pluck('product_id')
-            ->flip();
+        $likedProductIds = collect();
+
+        if ($customerId) {
+            $likedProductIds = auth('customer')->user()->wishlist()
+                ->whereIn('product_id', $productIds->all())
+                ->pluck('product_id')
+                ->flip();
+        }
 
         $likeCounts = $feedQueryService->getLikeCounts($productIds);
 
-        $followedStores = StoreFollower::query()
-            ->where('customer_id', $customerId)
-            ->whereIn('store_id', $storeIds->all())
-            ->pluck('store_id')
-            ->flip();
+        $followedStores = collect();
+
+        if ($customerId) {
+            $followedStores = StoreFollower::query()
+                ->where('customer_id', $customerId)
+                ->whereIn('store_id', $storeIds->all())
+                ->pluck('store_id')
+                ->flip();
+        }
 
         $comments = FeedComment::query()
             ->with('customer')

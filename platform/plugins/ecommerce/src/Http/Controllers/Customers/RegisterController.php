@@ -42,6 +42,16 @@ class RegisterController extends BaseController
             session(['url.intended' => url()->previous()]);
         }
 
+        if ($feedVendorRegistration = session('feed_vendor_registration')) {
+            session()->flashInput(array_merge(
+                session('_old_input', []),
+                array_filter([
+                    'name' => $feedVendorRegistration['name'] ?? null,
+                    'email' => $feedVendorRegistration['email'] ?? null,
+                ])
+            ));
+        }
+
         Theme::asset()
             ->container('footer')
             ->usePath(false)

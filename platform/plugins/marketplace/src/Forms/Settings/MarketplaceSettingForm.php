@@ -285,6 +285,54 @@ class MarketplaceSettingForm extends SettingForm
                     ->label(trans('plugins/marketplace::feed-pin.settings.show_comment_counts'))
                     ->value((bool) MarketplaceHelper::getSetting('feed_show_comment_counts', true))
             )
+            ->add(
+                'feed_allow_guest_product_post',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/marketplace::feed-pin.settings.allow_guest_product_post'))
+                    ->helperText(trans('plugins/marketplace::feed-pin.settings.allow_guest_product_post_help'))
+                    ->value(MarketplaceHelper::isGuestFeedPostingEnabled())
+            )
+            ->add(
+                'feed_guest_post_store_id',
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(trans('plugins/marketplace::feed-pin.settings.guest_post_store_id'))
+                    ->helperText(trans('plugins/marketplace::feed-pin.settings.guest_post_store_id_help'))
+                    ->value(MarketplaceHelper::getGuestFeedPostStoreId())
+            )
+            ->add(
+                'feed_guest_post_rate_limit_per_hour',
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(trans('plugins/marketplace::feed-pin.settings.guest_rate_limit_per_hour'))
+                    ->helperText(trans('plugins/marketplace::feed-pin.settings.guest_rate_limit_per_hour_help'))
+                    ->value((int) MarketplaceHelper::getSetting('feed_guest_post_rate_limit_per_hour', 5))
+            )
+            ->add(
+                'feed_guest_post_rate_limit_per_day',
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(trans('plugins/marketplace::feed-pin.settings.guest_rate_limit_per_day'))
+                    ->helperText(trans('plugins/marketplace::feed-pin.settings.guest_rate_limit_per_day_help'))
+                    ->value((int) MarketplaceHelper::getSetting('feed_guest_post_rate_limit_per_day', 20))
+            )
+            ->add(
+                'feed_guest_post_customer_rate_limit_per_hour',
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(trans('plugins/marketplace::feed-pin.settings.customer_rate_limit_per_hour'))
+                    ->helperText(trans('plugins/marketplace::feed-pin.settings.customer_rate_limit_per_hour_help'))
+                    ->value((int) MarketplaceHelper::getSetting('feed_guest_post_customer_rate_limit_per_hour', 10))
+            )
+            ->add(
+                'feed_guest_post_customer_rate_limit_per_day',
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(trans('plugins/marketplace::feed-pin.settings.customer_rate_limit_per_day'))
+                    ->helperText(trans('plugins/marketplace::feed-pin.settings.customer_rate_limit_per_day_help'))
+                    ->value((int) MarketplaceHelper::getSetting('feed_guest_post_customer_rate_limit_per_day', 30))
+            )
             ->addCloseFieldset('feed_settings');
     }
 }

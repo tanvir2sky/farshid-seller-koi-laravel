@@ -20,18 +20,28 @@ class FeedQueryService
     }
 
     public function getFeedPage(
-        Customer $customer,
+        ?Customer $customer,
         int $page,
         int $perPage = 8,
         bool $includePinsOnPageOne = true
     ): FeedPageResult {
-        $pinned = $includePinsOnPageOne && $page === 1
-            ? $this->feedPinService->resolvePinnedProducts()->loadMissing(['slugable', 'store', 'store.slugable'])
+        $recent = $includePinsOnPageOne && $page === 1
+            ? $this->resolveRecentUserPostsFromCookie()
             : collect();
 
-        $excludeIds = $this->feedPinService->excludedProductIdsForOrganic();
-        $pinnedShown = min($pinned->count(), $perPage);
-        $organicLimitPage1 = max(0, $perPage - $pinnedShown);
+        $pinned = $includePinsOnPageOne && $page === 1
+            ? $this->feedPinService->resolvePinnedProducts()
+            : collect();
+
+        $excludeIds = array_values(array_unique(array_merge(
+            $this->feedPinService->excludedProductIdsForOrganic(),
+            $recent->pluck('id')->all(),
+            $pinned->pluck('id')->all(),
+        )));
+
+        $recentShown = min($recent->count(), $perPage);
+        $pinnedShown = min($pinned->count(), max(0, $perPage - $recentShown));
+        $organicLimitPage1 = max(0, $perPage - $recentShown - $pinnedShown);
 
         $organicOffset = $page === 1
             ? 0
@@ -58,11 +68,17 @@ class FeedQueryService
             ->limit($organicLimit)
             ->get();
 
-        $items = $page === 1 && $pinned->isNotEmpty()
-            ? $pinned->take($perPage)->concat($organicItems)->unique('id')->values()->take($perPage)
+        $items = $page === 1
+            ? $recent
+                ->take($recentShown)
+                ->concat($pinned->take($pinnedShown))
+                ->concat($organicItems)
+                ->unique('id')
+                ->values()
+                ->take($perPage)
             : $organicItems;
 
-        $total = $organicTotal + $pinned->count();
+        $total = $organicTotal + $pinned->count() + $recent->count();
 
         $consumedP1 = min($organicLimitPage1, $organicTotal);
         $remaining = max(0, $organicTotal - $consumedP1);
@@ -81,7 +97,7 @@ class FeedQueryService
     /**
      * @deprecated Use getFeedPage(); kept for tests calling getProducts directly.
      */
-    public function getProducts(Customer $customer, int $perPage = 8): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public function getProducts(?Customer $customer, int $perPage = 8): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $result = $this->getFeedPage($customer, request()->integer('page', 1), $perPage, true);
 
@@ -101,14 +117,18 @@ class FeedQueryService
             ->pluck('total', 'product_id');
     }
 
-    protected function baseProductQuery(Customer $customer): Builder
+    protected function baseProductQuery(?Customer $customer): Builder
     {
         return Product::query()
             ->select('ec_products.*')
             ->leftJoin('mp_store_followers as feed_follows', function ($join) use ($customer): void {
-                $join
-                    ->on('feed_follows.store_id', '=', 'ec_products.store_id')
-                    ->where('feed_follows.customer_id', '=', $customer->getKey());
+                $join->on('feed_follows.store_id', '=', 'ec_products.store_id');
+
+                if ($customer) {
+                    $join->where('feed_follows.customer_id', '=', $customer->getKey());
+                } else {
+                    $join->whereRaw('0 = 1');
+                }
             })
             ->where('ec_products.status', BaseStatusEnum::PUBLISHED)
             ->where('ec_products.is_variation', 0)
@@ -123,7 +143,32 @@ class FeedQueryService
             ]);
     }
 
-    protected function applyAlgorithm(Builder $query, string $algorithm, Customer $customer, int $seed): void
+    protected function resolveRecentUserPostsFromCookie(): Collection
+    {
+        $ids = FeedRecentPostsCookie::activeProductIds();
+
+        if ($ids === []) {
+            return collect();
+        }
+
+        $products = Product::query()
+            ->whereIn('ec_products.id', $ids)
+            ->where('ec_products.status', BaseStatusEnum::PUBLISHED)
+            ->where('ec_products.is_variation', 0)
+            ->whereNotNull('ec_products.store_id')
+            ->where('ec_products.stock_status', 'in_stock')
+            ->whereHas('store', fn (Builder $query) => $query->where('status', StoreStatusEnum::PUBLISHED))
+            ->with(['slugable', 'store', 'store.slugable'])
+            ->get()
+            ->keyBy('id');
+
+        return collect($ids)
+            ->map(fn (int $id) => $products->get($id))
+            ->filter()
+            ->values();
+    }
+
+    protected function applyAlgorithm(Builder $query, string $algorithm, ?Customer $customer, int $seed): void
     {
         switch ($algorithm) {
             case FeedAlgorithmEnum::FOLLOW_FIRST_THEN_RANDOM:

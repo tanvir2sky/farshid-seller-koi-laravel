@@ -26,6 +26,7 @@ use Botble\Ecommerce\PanelSections\SettingEcommercePanelSection;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Middleware\RedirectIfNotVendor;
+use Botble\Marketplace\Http\Middleware\ThrottleFeedGuestProductPost;
 use Botble\Marketplace\Models\Revenue;
 use Botble\Marketplace\Models\Scopes\HideProductsByLockedVendorScope;
 use Botble\Marketplace\Models\Store;
@@ -77,6 +78,7 @@ class MarketplaceServiceProvider extends ServiceProvider
         Helper::autoload(__DIR__ . '/../../helpers');
 
         $this->app['router']->aliasMiddleware('vendor', RedirectIfNotVendor::class);
+        $this->app['router']->aliasMiddleware('feed-guest-throttle', ThrottleFeedGuestProductPost::class);
 
         AliasLoader::getInstance()->alias('MarketplaceHelper', MarketplaceHelper::class);
     }

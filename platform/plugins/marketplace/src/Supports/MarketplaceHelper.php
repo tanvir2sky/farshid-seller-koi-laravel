@@ -6,8 +6,11 @@ use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Supports\EmailHandler as BaseEmailHandler;
 use Botble\Ecommerce\Enums\DiscountTypeOptionEnum;
 use Botble\Ecommerce\Facades\OrderHelper;
+use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\Order as OrderModel;
 use Botble\Marketplace\Enums\FeedAlgorithmEnum;
+use Botble\Marketplace\Enums\StoreStatusEnum;
+use Botble\Marketplace\Models\Store;
 use Botble\Media\Facades\RvMedia;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Collection;
@@ -271,5 +274,53 @@ class MarketplaceHelper
             'show_like_counts' => filter_var($this->getSetting('feed_show_like_counts', true), FILTER_VALIDATE_BOOLEAN),
             'show_comment_counts' => filter_var($this->getSetting('feed_show_comment_counts', true), FILTER_VALIDATE_BOOLEAN),
         ];
+    }
+
+    public function isGuestFeedPostingEnabled(): bool
+    {
+        return filter_var($this->getSetting('feed_allow_guest_product_post', true), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    public function getGuestFeedPostStoreId(): int
+    {
+        return (int) $this->getSetting('feed_guest_post_store_id', 9999);
+    }
+
+    public function canCustomerPostToGuestFeedStore(?Customer $customer = null): bool
+    {
+        if (! $this->isGuestFeedPostingEnabled()) {
+            return false;
+        }
+
+        if (! $this->resolveGuestFeedPostStore()) {
+            return false;
+        }
+
+        $customer = $customer ?? auth('customer')->user();
+
+        if ($customer && $customer->is_vendor && $customer->store?->id) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function resolveGuestFeedPostStore(): ?Store
+    {
+        $storeId = $this->getGuestFeedPostStoreId();
+
+        if ($storeId <= 0) {
+            return null;
+        }
+
+        return Store::query()
+            ->whereKey($storeId)
+            ->where('status', StoreStatusEnum::PUBLISHED)
+            ->first();
+    }
+
+    public function getFeedRecentPostHighlightDays(): int
+    {
+        return max(1, (int) $this->getSetting('feed_recent_post_highlight_days', 7));
     }
 }

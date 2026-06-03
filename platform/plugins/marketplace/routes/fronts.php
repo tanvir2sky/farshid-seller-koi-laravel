@@ -58,15 +58,21 @@ Route::group([
             Route::get('{store}/refresh', [CustomerMessageController::class, 'refresh'])->name('refresh')->wherePrimaryKey('store');
         });
 
-        Route::middleware('customer')->get('feed', [FeedController::class, 'index'])->name('public.feed');
+        Route::get('feed', [FeedController::class, 'index'])->name('public.feed');
 
-        Route::middleware('customer')->prefix('feed')->name('public.feed.')->group(function (): void {
-            Route::get('followed-stores', [FeedController::class, 'followedStores'])->name('followed-stores');
+        Route::prefix('feed')->name('public.feed.')->group(function (): void {
             Route::get('items', [FeedController::class, 'loadMore'])->name('items');
-            Route::post('comments', [FeedController::class, 'comment'])->name('comments');
-            Route::post('follow/{store}', [FeedController::class, 'follow'])->name('follow')->wherePrimaryKey('store');
-            Route::delete('follow/{store}', [FeedController::class, 'unfollow'])->name('unfollow')->wherePrimaryKey('store');
-            Route::post('products', [FeedController::class, 'storeProduct'])->name('products.store');
+            Route::post('guest-products', [FeedController::class, 'storeGuestProduct'])
+                ->middleware('feed-guest-throttle')
+                ->name('guest-products.store');
+
+            Route::middleware('customer')->group(function (): void {
+                Route::get('followed-stores', [FeedController::class, 'followedStores'])->name('followed-stores');
+                Route::post('comments', [FeedController::class, 'comment'])->name('comments');
+                Route::post('follow/{store}', [FeedController::class, 'follow'])->name('follow')->wherePrimaryKey('store');
+                Route::delete('follow/{store}', [FeedController::class, 'unfollow'])->name('unfollow')->wherePrimaryKey('store');
+                Route::post('products', [FeedController::class, 'storeProduct'])->name('products.store');
+            });
         });
     });
 });

@@ -25,29 +25,43 @@ class FeedPinService
     {
         $pins = $this->activePinsQuery()->get();
         $seen = [];
-        $products = collect();
 
         $vendorLimit = (int) MarketplaceHelper::getSetting('feed_vendor_pin_product_limit', 3);
         $vendorLimit = max(1, min(20, $vendorLimit));
+
+        $orderedIds = [];
 
         foreach ($pins as $pin) {
             if ($pin->pin_type->value === FeedPinTypeEnum::PRODUCT) {
                 $product = $this->resolveProductPin((int) $pin->target_id);
                 if ($product && ! isset($seen[$product->getKey()])) {
                     $seen[$product->getKey()] = true;
-                    $products->push($product);
+                    $orderedIds[] = $product->getKey();
                 }
             } elseif ($pin->pin_type->value === FeedPinTypeEnum::VENDOR_STORE) {
                 foreach ($this->resolveVendorPinProducts((int) $pin->target_id, $vendorLimit) as $product) {
                     if (! isset($seen[$product->getKey()])) {
                         $seen[$product->getKey()] = true;
-                        $products->push($product);
+                        $orderedIds[] = $product->getKey();
                     }
                 }
             }
         }
 
-        return $products->values();
+        if ($orderedIds === []) {
+            return collect();
+        }
+
+        $loaded = Product::query()
+            ->whereIn('id', $orderedIds)
+            ->with(['slugable', 'store', 'store.slugable'])
+            ->get()
+            ->keyBy('id');
+
+        return collect($orderedIds)
+            ->map(fn (int $id) => $loaded->get($id))
+            ->filter()
+            ->values();
     }
 
     /**
@@ -66,6 +80,7 @@ class FeedPinService
             ->where('is_variation', 0)
             ->whereNotNull('store_id')
             ->whereHas('store', fn ($q) => $q->where('status', StoreStatusEnum::PUBLISHED))
+            ->select('ec_products.id')
             ->first();
     }
 
@@ -84,6 +99,7 @@ class FeedPinService
             ->where('store_id', $store->getKey())
             ->where('status', BaseStatusEnum::PUBLISHED)
             ->where('is_variation', 0)
+            ->select('ec_products.id')
             ->latest('id')
             ->limit($limit)
             ->get();

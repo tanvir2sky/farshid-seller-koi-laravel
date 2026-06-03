@@ -72,6 +72,12 @@ class Plugin extends PluginOperationAbstract
             'marketplace_feed_density',
             'marketplace_feed_show_like_counts',
             'marketplace_feed_show_comment_counts',
+            'marketplace_feed_allow_guest_product_post',
+            'marketplace_feed_guest_post_store_id',
+            'marketplace_feed_guest_post_rate_limit_per_hour',
+            'marketplace_feed_guest_post_rate_limit_per_day',
+            'marketplace_feed_guest_post_customer_rate_limit_per_hour',
+            'marketplace_feed_guest_post_customer_rate_limit_per_day',
         ]);
     }
 }

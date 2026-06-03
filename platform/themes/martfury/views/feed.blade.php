@@ -8,11 +8,17 @@
         <div class="feed-wrapper">
             <div id="feed-flash-message" class="alert alert-success d-none mb-3" role="alert"></div>
 
-            <div class="feed-card mb-4 d-flex justify-content-end">
-                <a class="ps-btn ps-btn--sm" href="{{ route('public.feed.followed-stores') }}">{{ __('View All Followed Store') }}</a>
-            </div>
+            @auth('customer')
+                <div class="feed-card mb-4 d-flex justify-content-end">
+                    <a class="ps-btn ps-btn--sm" href="{{ route('public.feed.followed-stores') }}">{{ __('View All Followed Store') }}</a>
+                </div>
+            @endauth
 
-            @if (auth('customer')->user()->is_vendor)
+            @if (! empty($canGuestPost))
+                {!! Theme::partial('feed-guest-post-form', compact('categories')) !!}
+            @endif
+
+            @if (auth('customer')->check() && auth('customer')->user()->is_vendor)
                 <div class="feed-card mb-4">
                     <h4 class="mb-3">{{ __('Create product') }}</h4>
                     <form id="feed-create-product-form" action="{{ route('public.feed.products.store') }}" method="POST">
@@ -95,7 +101,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const feedItems = document.getElementById('feed-items');
     const loader = document.getElementById('feed-loader');
     const createForm = document.getElementById('feed-create-product-form');
+    const guestForm = document.getElementById('feed-guest-product-form');
     const toggleOptions = document.querySelector('[data-toggle-options]');
+    const toggleGuestOptions = document.querySelector('[data-toggle-guest-options]');
     const flashMessage = document.getElementById('feed-flash-message');
 
     const showFlash = function (message) {
@@ -116,21 +124,91 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    if (createForm) {
-        createForm.addEventListener('submit', async function (e) {
+    if (toggleGuestOptions) {
+        toggleGuestOptions.addEventListener('click', function (e) {
             e.preventDefault();
-            const response = await fetch(createForm.action, {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
-                body: new FormData(createForm),
-            });
-            const data = await response.json();
-            if (response.ok) {
-                showFlash(data.message);
-                window.location.href = data.redirect;
-            }
+            const box = document.querySelector('.feed-guest-product-options');
+            box.classList.toggle('d-none');
         });
     }
+
+    const vendorCheckbox = document.getElementById('feed-register-as-vendor');
+    const vendorFields = document.getElementById('feed-vendor-registration-fields');
+
+    const syncVendorRegistrationFields = function () {
+        if (!vendorCheckbox || !vendorFields) return;
+
+        const show = vendorCheckbox.checked;
+        vendorFields.classList.toggle('d-none', !show);
+
+        vendorFields.querySelectorAll('[data-vendor-required]').forEach(function (input) {
+            input.required = show;
+            if (!show) {
+                input.setCustomValidity('');
+            }
+        });
+    };
+
+    if (vendorCheckbox) {
+        vendorCheckbox.addEventListener('change', syncVendorRegistrationFields);
+        syncVendorRegistrationFields();
+    }
+
+    const bindProductForm = function (form) {
+        if (!form) return;
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            if (vendorCheckbox && vendorCheckbox.checked) {
+                syncVendorRegistrationFields();
+                if (!form.reportValidity()) {
+                    return;
+                }
+            }
+
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json',
+                },
+                body: new FormData(form),
+            });
+            let data = {};
+            try {
+                data = await response.json();
+            } catch (err) {
+                data = {};
+            }
+            if (response.ok) {
+                if (flashMessage) {
+                    flashMessage.classList.remove('alert-warning');
+                    flashMessage.classList.add('alert-success');
+                }
+                showFlash(data.message);
+                window.location.href = data.redirect;
+                return;
+            }
+
+            let message = data.message || '';
+
+            if (response.status === 422 && data.errors) {
+                const firstError = Object.values(data.errors).flat()[0];
+                if (firstError) {
+                    message = firstError;
+                }
+            }
+
+            if (message && flashMessage) {
+                flashMessage.classList.remove('alert-success');
+                flashMessage.classList.add('alert-warning');
+                showFlash(message);
+            }
+        });
+    };
+
+    bindProductForm(createForm);
+    bindProductForm(guestForm);
 
     document.addEventListener('click', async function (e) {
         const likeBtn = e.target.closest('[data-feed-like]');
