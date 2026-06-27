@@ -103,6 +103,9 @@
                         ]) !!}
                         @if (is_plugin_active('ecommerce'))
                             <ul class="navigation__extra">
+                                @if (is_plugin_active('marketplace') && Route::has('public.feed'))
+                                    <li><a href="{{ route('public.feed') }}">{{ __('Shop Feed') }}</a></li>
+                                @endif
                                 @if (is_plugin_active('marketplace'))
                                     <li><a href="{{ !auth('customer')->check() ? route('customer.register') : (auth('customer')->user()->is_vendor ? route('marketplace.vendor.dashboard') : route('marketplace.vendor.become-vendor')) }}">{{ theme_option('sell_on_site_text') ?: __('Sell On Martfury') }}</a></li>
                                 @endif
@@ -166,6 +169,9 @@
                 <a class="navigation__item ps-toggle--sidebar" href="#menu-mobile"><i class="icon-menu"></i><span> {{ __('Menu') }}</span></a>
                 <a class="navigation__item ps-toggle--sidebar" href="#navigation-mobile"><i class="icon-list4"></i><span> {{ __('Categories') }}</span></a>
                 <a class="navigation__item ps-toggle--sidebar" href="#search-sidebar"><i class="icon-magnifier"></i><span> {{ __('Search') }}</span></a>
+                @if (is_plugin_active('marketplace') && Route::has('public.feed'))
+                    <a class="navigation__item" href="{{ route('public.feed') }}"><i class="icon-layers"></i><span> {{ __('Shop Feed') }}</span></a>
+                @endif
                 <a class="navigation__item ps-toggle--sidebar" href="#cart-mobile"><i class="icon-bag2"></i><span> {{ __('Cart') }}</span></a></div>
         </div>
 
@@ -197,6 +203,9 @@
                 ]) !!}
 
                 <ul class="menu--mobile menu--mobile-extra">
+                    @if (is_plugin_active('marketplace') && Route::has('public.feed'))
+                        <li><a href="{{ route('public.feed') }}"><i class="icon-layers"></i> <span>{{ __('Shop Feed') }}</span></a></li>
+                    @endif
                     @if (is_plugin_active('ecommerce'))
                         @if (EcommerceHelper::isOrderTrackingEnabled())
                             <li><a href="{{ route('public.orders.tracking') }}"><i class="icon-check-square"></i> <span>{{ __('Track your order') }}</span></a></li>
