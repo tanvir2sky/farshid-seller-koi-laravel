@@ -74,6 +74,46 @@
     .feed-page--density-compact .feed-card { padding: 12px; }
     .feed-page--density-compact .feed-card.mb-4 { margin-bottom: 12px !important; }
     .feed-meta { font-size: 13px; color: #666; }
+    .feed-product-title {
+        display: inline-block;
+        font-size: 17px;
+        font-weight: 600;
+        color: #1c1e21;
+        text-decoration: none;
+        line-height: 1.35;
+        margin-bottom: 4px;
+    }
+    .feed-product-title:hover {
+        color: var(--feed-accent, #1877f2);
+        text-decoration: underline;
+    }
+    .feed-vendor-name {
+        color: var(--feed-accent, #1877f2);
+        font-weight: 700;
+        background: color-mix(in srgb, var(--feed-accent, #1877f2) 14%, #ffffff);
+        padding: 2px 8px;
+        border-radius: 999px;
+        text-decoration: none;
+        display: inline-block;
+    }
+    a.feed-vendor-name:hover {
+        text-decoration: underline;
+    }
+    .feed-product-price {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1c1e21;
+        margin: 8px 0 0;
+    }
+    .feed-product-price.is-sale {
+        color: var(--feed-accent, #1877f2);
+    }
+    .feed-product-price del {
+        color: #888;
+        font-weight: 400;
+        margin-left: 6px;
+        font-size: 13px;
+    }
     .feed-actions { display: flex; gap: 16px; margin: 10px 0; }
     .feed-action-btn { border: 0; background: transparent; padding: 0; color: #333; font-weight: 500; }
     .feed-action-btn.is-active { color: var(--feed-accent, #007bff); }

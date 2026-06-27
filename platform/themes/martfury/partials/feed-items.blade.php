@@ -11,16 +11,42 @@
     <article class="feed-card mb-4">
         <div class="d-flex justify-content-between align-items-start">
             <div>
-                <strong>{{ $product->name }}</strong>
+                <a
+                    href="{{ $product->url }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="feed-product-title"
+                >
+                    {!! BaseHelper::clean($product->name) !!}
+                </a>
                 <div class="feed-meta">
                     {{ __('By') }}
                     @if($store && $store->url)
-                        <a href="{{ $store->url }}">{{ $store->name }}</a>
+                        <a href="{{ $store->url }}" class="feed-vendor-name">{{ $store->name }}</a>
                     @else
-                        <span>{{ __('Vendor') }}</span>
+                        <span class="feed-vendor-name">{{ __('Vendor') }}</span>
                     @endif
                     · {{ $product->created_at?->diffForHumans() }}
                 </div>
+                @if (! EcommerceHelper::hideProductPrice() || EcommerceHelper::isCartEnabled())
+                    @if ($product->hasPriceRange())
+                        @php
+                            $maxPrice = $product->max_price;
+
+                            if (EcommerceHelper::isDisplayProductIncludingTaxes()) {
+                                $maxPrice += $maxPrice * ($product->total_taxes_percentage / 100);
+                            }
+                        @endphp
+                        <p class="feed-product-price">{{ format_price($product->price_with_taxes) }} - {{ format_price($maxPrice) }}</p>
+                    @else
+                        <p class="feed-product-price @if ($product->front_sale_price !== $product->price) is-sale @endif">
+                            {{ format_price($product->front_sale_price_with_taxes) }}
+                            @if ($product->front_sale_price !== $product->price)
+                                <del>{{ format_price($product->price_with_taxes) }}</del>
+                            @endif
+                        </p>
+                    @endif
+                @endif
             </div>
             @auth('customer')
             @if($store)
