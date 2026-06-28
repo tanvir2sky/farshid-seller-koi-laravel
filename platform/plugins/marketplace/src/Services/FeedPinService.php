@@ -32,13 +32,17 @@ class FeedPinService
         $orderedIds = [];
 
         foreach ($pins as $pin) {
-            if ($pin->pin_type->value === FeedPinTypeEnum::PRODUCT) {
+            $pinType = $pin->pin_type instanceof FeedPinTypeEnum
+                ? $pin->pin_type->getValue()
+                : (string) $pin->pin_type;
+
+            if ($pinType === FeedPinTypeEnum::PRODUCT) {
                 $product = $this->resolveProductPin((int) $pin->target_id);
                 if ($product && ! isset($seen[$product->getKey()])) {
                     $seen[$product->getKey()] = true;
                     $orderedIds[] = $product->getKey();
                 }
-            } elseif ($pin->pin_type->value === FeedPinTypeEnum::VENDOR_STORE) {
+            } elseif ($pinType === FeedPinTypeEnum::VENDOR_STORE) {
                 foreach ($this->resolveVendorPinProducts((int) $pin->target_id, $vendorLimit) as $product) {
                     if (! isset($seen[$product->getKey()])) {
                         $seen[$product->getKey()] = true;
